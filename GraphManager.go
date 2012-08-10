@@ -24,7 +24,6 @@ func (gm *GraphManager) Initialize() {
 	//var e error
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set("nodeCount", []byte("0"))
-
 	gm.nodes = make(map[string]*Node)
 	gm.edges = make(map[string]*Edge)
 }
@@ -83,6 +82,10 @@ func (gm *GraphManager) GetNode(index string) *Node {
 
 //Add neigbhbor both locally and in db
 func (gm *GraphManager) AddNeighbor(node *Node, edge *Edge) {
+
+}
+
+func (gm *GraphManager) GetNeighbors(node *Node) []*Node{
 
 }
 
