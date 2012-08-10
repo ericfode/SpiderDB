@@ -1,15 +1,14 @@
 package spiderDB
 
-type Node struct {
-	id    string
-	value string
-}
 
-func (n *Node) Update() {
+type EagerNode interface {
+	GetID() string //DB
+	SetID(id string)
 
-}
+	SetEdges(edges map[string][]*Edge)
+	AddEdges(edge []*Edge)	
+	RemoveEdge(string []*Edge)
 
-// Get all neighbors
-func (n *Node) GetNeighbors() {
-
+	GetPropMap() map[string][]byte
+	SetPropMap(props map[string][]byte)
 }
