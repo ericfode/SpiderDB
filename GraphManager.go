@@ -23,7 +23,7 @@ type GraphManager struct {
 func (gm *GraphManager) Initialize() {
 	//var e error
 	gm.client, _ = redis.NewSynchClient()
-	gm.client.Set("nodeCount", []byte("0"))
+	gm.client.Set("currIndex", []byte("0"))
 
 	gm.nodes = make(map[string]*Node)
 	gm.edges = make(map[string]*Edge)
@@ -34,16 +34,21 @@ func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
 
 // NODE MANAGEMENT
 
+func (gm *GraphManager) GetNextIndex() string {
+	index, _ := gm.client.Get("currIndex")
+	gm.client.Incr("currIndex")
+
+	return string(index)
+}
+
 func (gm *GraphManager) AddNode(n *Node) *Node {
 
 	//Database
-
-	index, _ := gm.client.Get("nodeCount")
-	gm.client.Incr("nodeCount")
+	index := gm.GetNextIndex()
 	gm.client.Hset("node:"+string(index), "index", []byte(index))
 
 	//Add node to index
-	gm.client.Sadd("nodes", index)
+	gm.client.Sadd("nodes", []byte(index))
 	//Local
 	n.id = string(index)
 	gm.nodes[string(index)] = n
@@ -53,6 +58,7 @@ func (gm *GraphManager) AddNode(n *Node) *Node {
 func (gm *GraphManager) DeleteNode(n *Node) {
 	//Database
 	gm.client.Srem("nodes", []byte(n.id))
+	gm.client.Del("node:" + n.id)
 	//Local
 	gm.nodes[n.id] = nil
 	n = nil
@@ -69,7 +75,7 @@ func (gm *GraphManager) UpdateNode(n *Node) bool {
 func (gm *GraphManager) GetNode(index string) *Node {
 	nodeIdx, err := gm.client.Hget("node:"+index, "index")
 
-	if err != nil {
+	if err != nil || nodeIdx == nil {
 		return nil
 	}
 
@@ -88,8 +94,17 @@ func (gm *GraphManager) AddNeighbor(node *Node, edge *Edge) {
 
 //EDGE MANAGEMENT
 
-func (gm *GraphManager) CreateEdge() *Edge {
-	return nil
+func (gm *GraphManager) AddEdge(e *Edge) *Edge {
+
+	index := gm.GetNextIndex()
+	gm.client.Hset("edge:"+string(e.id), "index", []byte(index))
+
+	//Add node to index
+	gm.client.Sadd("edges", []byte(index))
+	//Local
+	e.id = index
+	gm.edges[index] = e
+	return e
 }
 
 func (gm *GraphManager) DeleteEdge(e *Edge) {
@@ -108,6 +123,7 @@ func (gm *GraphManager) GetEdge(id int) *Edge {
 }
 
 func (gm *GraphManager) ClearAll() {
+	gm.client.Set("currIndex", []byte("0"))
 	gm.client.Flushdb()
 	gm.nodes = nil
 	gm.edges = nil
