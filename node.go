@@ -1,7 +1,7 @@
 package spiderDB
 
 
-type EagerNode interface {
+type Node interface {
 	GetID() string //DB
 	SetID(id string)
 
@@ -11,4 +11,8 @@ type EagerNode interface {
 
 	GetPropMap() map[string][]byte
 	SetPropMap(props map[string][]byte)
+
+	SetGM(gm *GraphManager)
+
+	
 }
