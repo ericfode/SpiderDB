@@ -92,6 +92,10 @@ func (gm *GraphManager) AddNeighbor(node *Node, edge *Edge) {
 
 }
 
+func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
+
+}
+
 //EDGE MANAGEMENT
 
 func (gm *GraphManager) AddEdge(e *Edge) *Edge {
