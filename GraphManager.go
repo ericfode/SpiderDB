@@ -32,8 +32,6 @@ func (gm *GraphManager) Initialize() {
 func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
 }
 
-// NODE MANAGEMENT
-
 func (gm *GraphManager) GetNextIndex() string {
 	index, _ := gm.client.Get("currIndex")
 	gm.client.Incr("currIndex")
@@ -41,51 +39,63 @@ func (gm *GraphManager) GetNextIndex() string {
 	return string(index)
 }
 
-func (gm *GraphManager) AddNode(n *Node) *Node {
+// NODE MANAGEMENT
 
+func (gm *GraphManager) AddNode(n *Node) {
 	//Database
 	index := gm.GetNextIndex()
-	gm.client.Hset("node:"+string(index), "index", []byte(index))
+	props := n.GetPropMap()
+
+	gm.client.Hset("node:"+index, "props", props[index])
+	//gm.client.Hset("node:"+string(index), "index", []byte(index))
 
 	//Add node to index
-	gm.client.Sadd("nodes", []byte(index))
+	gm.client.Sadd("nodes", props[string(index)])
+	//gm.client.Sadd("nodes", []byte(index))
+
 	//Local
-	n.id = string(index)
+	n.SetID(index)
 	gm.nodes[string(index)] = n
-	return n
 }
 
 func (gm *GraphManager) DeleteNode(n *Node) {
 	//Database
-	gm.client.Srem("nodes", []byte(n.id))
-	gm.client.Del("node:" + n.id)
+	index = n.GetID()
+	gm.client.Srem("nodes", []byte(index))
+	gm.client.Del("node:" + index)
 	//Local
-	gm.nodes[n.id] = nil
+	gm.nodes[index] = nil
 	n = nil
 }
 
-func (gm *GraphManager) FindNode(name string) *Node {
-	return nil
+func (gm *GraphManager) FindNode(index string) *Node {
+	n, ok := gm.nodes[index]
+	//if local
+	if ok == true {
+		return n
+	}
+	//otherwise, get from db
+	return gm.GetNode(index)
 }
 
 func (gm *GraphManager) UpdateNode(n *Node) bool {
 	return true
 }
 
-func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte){
+func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) {
 
 }
 
 func (gm *GraphManager) GetNode(index string) *Node {
-	nodeIdx, err := gm.client.Hget("node:"+index, "index")
+	nodeIdx, err := gm.client.Hget("node:"+index, "props")
 
 	if err != nil || nodeIdx == nil {
 		return nil
 	}
 
 	node := new(Node)
-	node.id = string(nodeIdx)
-	gm.nodes[node.id] = node
+	node.SetID(nodeIdx)
+	gm.nodes[nodeIdx] = node
 	return node
 }
 
@@ -102,17 +112,18 @@ func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
 
 //EDGE MANAGEMENT
 
-func (gm *GraphManager) AddEdge(e *Edge) *Edge {
+func (gm *GraphManager) AddEdge(e *Edge) {
 
 	index := gm.GetNextIndex()
-	gm.client.Hset("edge:"+string(e.id), "index", []byte(index))
+	props := e.GetWeight()
+	gm.client.Hset("edge:"+index, "props", []byte(props))
 
 	//Add node to index
-	gm.client.Sadd("edges", []byte(index))
+	gm.client.Sadd("edges", []byte(props))
+
 	//Local
-	e.id = index
+	e.SetId(index)
 	gm.edges[index] = e
-	return e
 }
 
 func (gm *GraphManager) DeleteEdge(e *Edge) {
@@ -128,6 +139,17 @@ func (gm *GraphManager) UpdateEdge(e *Edge) bool {
 
 func (gm *GraphManager) GetEdge(id int) *Edge {
 	return nil
+}
+
+func (gm *GraphManager) GetNodeEdges(n *Node) map[string][]*Edge {
+
+	ret := make(map[string][]*Edge, len(gm.edges))
+	//for each edge, classify and add edge pointer to correct slice
+	for i := 0; i < len(gm.edges); i++ {
+		typ := gm.edges[i].GetType()
+		ret[typ] = append(ret[typ], gm.edges[i])
+	}
+	return ret
 }
 
 func (gm *GraphManager) ClearAll() {
