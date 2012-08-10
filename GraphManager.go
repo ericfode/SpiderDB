@@ -65,6 +65,10 @@ func (gm *GraphManager) UpdateNode(n *Node) bool {
 	return true
 }
 
+func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte){
+
+}
+
 func (gm *GraphManager) GetNode(index string) *Node {
 	nodeIdx, err := gm.client.Hget("node:"+index, "index")
 
