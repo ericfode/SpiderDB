@@ -1,4 +1,4 @@
-package mains
+package spiderDB
 
 type Edge struct {
 	id   int

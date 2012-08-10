@@ -1,8 +1,4 @@
-package main
-
-import (
-	"fmt"
-)
+package spiderDB
 
 type Node struct {
 	id    string
