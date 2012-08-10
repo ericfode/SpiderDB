@@ -8,3 +8,4 @@ type Edge interface{
 	GetType() string
 	SetType(type string)
 }
+
