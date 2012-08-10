@@ -1,21 +1,19 @@
-package main 
+package main
 
-import{
+import (
 	"fmt"
-	"github.com/hosie/redis.io"
-}
+)
 
 type Node struct {
-	id int
+	id    string
 	value string
 }
 
-func ( n Node*) Update() {
+func (n *Node) Update() {
 
 }
 
 // Get all neighbors
-func ( n Node* ) GetNeighbors() {
+func (n *Node) GetNeighbors() {
 
 }
-

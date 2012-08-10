@@ -1,33 +1,30 @@
-package main
+package mains
 
 type Edge struct {
-	id int
+	id   int
 	desc string
 }
 
 // GETTERS & SETTERS
 
 //Return connected nodes
-func ( e Edge* ) GetNodes() {
-	  	
-} 
-
-func ( e Edge* ) SetDesc() {
-	  	
-} 
-
-func ( e Edge* ) GetDesc(){
+func (e *Edge) GetNodes() {
 
 }
 
-func ( e Edge* ) GetID(){
+func (e *Edge) SetDesc() {
+
+}
+
+func (e *Edge) GetDesc() {
+
+}
+
+func (e *Edge) GetID() {
 
 }
 
 // Update local copy from database
-func ( e Edge* ) Pull() {
-	  	
-} 
+func (e *Edge) Pull() {
 
-
-
+}
