@@ -19,32 +19,35 @@ const edge_s = "edge:"
 const nodes_s = "nodes"
 const edges_s = "edges"
 const props_s = "props"
-
-type KeyNotFoundError string
+const adj_s = "adj"
 
 //Initializes database at startup
 
 type GraphManager struct {
-	nodes  map[string]*Node
-	edges  map[string]*Edge
+	nodes  map[string]Node
+	edges  map[string]Edge
 	client redis.Client
+	//	nodeConstructors []NodeConstructor
+	//	edgeConstructors []EdgeConstructor
 }
 
 func (gm *GraphManager) Initialize() {
 	//var e error
+
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set(currIndex_s, []byte("0"))
 
-	gm.Connect(port, ipAddr, dbNum)
+	//gm.Connect(port, ipAddr, dbNum)
 
-	gm.nodes = make(map[string]*Node)
-	gm.edges = make(map[string]*Edge)
+	gm.nodes = make(map[string]Node)
+	gm.edges = make(map[string]Edge)
 }
 
+/*
 func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
 	gm.client, _ = redis.NewSynchClient()
 }
-
+*/
 func (gm *GraphManager) GetNextIndex() string {
 	index, _ := gm.client.Get(currIndex_s)
 	gm.client.Incr(currIndex_s)
@@ -54,8 +57,9 @@ func (gm *GraphManager) GetNextIndex() string {
 
 // NODE MANAGEMENT
 
-func (gm *GraphManager) AddNode(n *Node) {
+func (gm *GraphManager) AddNode(n Node) {
 	//Database
+
 	index := gm.GetNextIndex()
 	nindex := node_s + index
 	props := n.GetPropMap()
@@ -73,17 +77,17 @@ func (gm *GraphManager) AddNode(n *Node) {
 	gm.nodes[nindex] = n
 }
 
-func (gm *GraphManager) DeleteNode(n *Node) {
+func (gm *GraphManager) DeleteNode(n Node) {
 	//Database
-	nindex = n.GetID()
-	gm.client.Srem(nodes_s, []byte(index))
+	nindex := n.GetID()
+	gm.client.Srem(nodes_s, []byte(nindex))
 	gm.client.Del(nindex)
 	//Local
 	gm.nodes[nindex] = nil
 	n = nil
 }
 
-func (gm *GraphManager) FindNode(nindex string) *Node {
+func (gm *GraphManager) FindNode(nindex string) Node {
 	n, ok := gm.nodes[nindex]
 	//if local
 	if ok == true {
@@ -94,15 +98,17 @@ func (gm *GraphManager) FindNode(nindex string) *Node {
 }
 
 //bulk update - pushes everything to database
-func (gm *GraphManager) UpdateNode(n *Node) Error {
+func (gm *GraphManager) UpdateNode(n Node) error {
+	n.GetID()
 
-	e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
-	return true
+	//e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
+	return nil
 }
 
 //pushes change of single prop to db
-func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) error {
-	if n.GetId() == nil {
+func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error {
+
+	if n.GetId() == "" {
 		return &NodeNotAddedToDBError{e}
 	}
 
@@ -111,7 +117,7 @@ func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) error 
 	gm.client.Hset(nindex, prop, value)
 }
 
-func (gm *GraphManager) GetNode(index string) *Node {
+func (gm *GraphManager) GetNode(index string) Node {
 	nodeIdx, err := gm.client.Hget(node_s+index, props_s)
 
 	if err != nil || nodeIdx == nil {
@@ -127,17 +133,39 @@ func (gm *GraphManager) GetNode(index string) *Node {
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
 
 //Add neigbhbor both locally and in db
-func (gm *GraphManager) AddNeighbor(node *Node, edge *Edge) {
 
+//attach bidirectional Neighbor
+//think about using this same pattern (passing a type) for other funcs 
+func (gm *GraphManager) Attach(node1 Node, node2 Node, edge Edge) {
+	//decide if being able to add nodes and edges that don't have ids
+	//into the data base is a good idea or if making the user explicitly
+	//do it is a good idea
+	//i think that having different behavior then just attaching a neightbor
+	//is a bad idea
+	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), e.GetId())
+	if !e.IsDirected() {
+		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), e.GetId())
+	}
+	node1.AddEdges(edge)
+	node2.AddEdges(edge)
+	edge.SetFirstNode(node1)
+	edge.SetSecondNode(node2)
 }
 
-func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
+func (gm *GraphManager) GetNeighbors(node Node) ([]*Connection, error) {
+	conns, ok := gm.client.Hgetall(key)
+	if ok != nil {
+		return _, ok.Error()
+	}
+	for index, val := range conns {
+
+	}
 
 }
 
 //EDGE MANAGEMENT
 
-func (gm *GraphManager) AddEdge(e *Edge) {
+func (gm *GraphManager) AddEdge(e Edge) {
 
 	//Database
 	index := gm.GetNextIndex()
@@ -152,17 +180,12 @@ func (gm *GraphManager) AddEdge(e *Edge) {
 	//Add node to index
 	gm.client.Sadd(edges_s, []byte(eindex))
 
-	//TODO: Add links to adj Matrix
-	//
-	//
-	//
-
 	//Local
 	e.SetId(eindex)
 	gm.edges[eindex] = e
 }
 
-func (gm *GraphManager) DeleteEdge(e *Edge) {
+func (gm *GraphManager) DeleteEdge(e Edge) {
 
 	eindex = e.GetId()
 
@@ -178,15 +201,15 @@ func (gm *GraphManager) DeleteEdge(e *Edge) {
 	e = nil
 }
 
-func (gm *GraphManager) FindEdge(id int) *Edge {
+func (gm *GraphManager) FindEdge(id int) Edge {
 	return nil
 }
 
-func (gm *GraphManager) UpdateEdge(e *Edge) bool {
+func (gm *GraphManager) UpdateEdge(e Edge) bool {
 	return true
 }
 
-func (gm *GraphManager) UpdateEdgeProp(e *Edge, prop string, value []byte) error {
+func (gm *GraphManager) UpdateEdgeProp(e Edge, prop string, value []byte) error {
 	if e.GetId() == nil {
 		return &EdgeNotAddedToDBError{e}
 	}
@@ -196,11 +219,11 @@ func (gm *GraphManager) UpdateEdgeProp(e *Edge, prop string, value []byte) error
 	gm.client.Hset(nindex, prop, value)
 }
 
-func (gm *GraphManager) GetEdge(id int) *Edge {
+func (gm *GraphManager) GetEdge(id int) Edge {
 	return nil
 }
 
-func (gm *GraphManager) GetNodeEdges(n *Node) map[string][]*Edge {
+func (gm *GraphManager) GetNodeEdges(n Node) map[string][]Edge {
 
 	ret := make(map[string][]*Edge, len(gm.edges))
 	//for each edge, classify and add edge pointer to correct slice
