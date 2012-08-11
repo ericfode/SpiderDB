@@ -12,6 +12,16 @@ package spiderDB
 
 import "github.com/alphazero/Go-Redis"
 
+// consts (typo prevention)
+const currIndex_s = "currIndex"
+const node_s = "node:"
+const edge_s = "edge:"
+const nodes_s = "nodes"
+const edges_s = "edges"
+const props_s = "props"
+
+type KeyNotFoundError string
+
 //Initializes database at startup
 
 type GraphManager struct {
@@ -23,62 +33,88 @@ type GraphManager struct {
 func (gm *GraphManager) Initialize() {
 	//var e error
 	gm.client, _ = redis.NewSynchClient()
-	gm.client.Set("nodeCount", []byte("0"))
+	gm.client.Set(currIndex_s, []byte("0"))
+
+	gm.Connect(port, ipAddr, dbNum)
+
 	gm.nodes = make(map[string]*Node)
 	gm.edges = make(map[string]*Edge)
 }
 
 func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
+	gm.client, _ = redis.NewSynchClient()
+}
+
+func (gm *GraphManager) GetNextIndex() string {
+	index, _ := gm.client.Get(currIndex_s)
+	gm.client.Incr(currIndex_s)
+
+	return string(index)
 }
 
 // NODE MANAGEMENT
 
-func (gm *GraphManager) AddNode(n *Node) *Node {
-
+func (gm *GraphManager) AddNode(n *Node) {
 	//Database
+	index := gm.GetNextIndex()
+	nindex := node_s + index
+	props := n.GetPropMap()
 
-	index, _ := gm.client.Get("nodeCount")
-	gm.client.Incr("nodeCount")
-	gm.client.Hset("node:"+string(index), "index", []byte(index))
+	//Add node props to database node
+	for k, v := range props {
+		gm.client.Hset(nindex, k, v)
+	}
 
-	//Add node to index
-	gm.client.Sadd("nodes", index)
+	//Add node to node-index
+	gm.client.Sadd(nodes_s, []byte(nindex))
+
 	//Local
-	n.id = string(index)
-	gm.nodes[string(index)] = n
-	return n
+	n.SetID(nindex)
+	gm.nodes[nindex] = n
 }
 
 func (gm *GraphManager) DeleteNode(n *Node) {
 	//Database
-	gm.client.Srem("nodes", []byte(n.id))
+	nindex = n.GetID()
+	gm.client.Srem(nodes_s, []byte(index))
+	gm.client.Del(nindex)
 	//Local
-	gm.nodes[n.id] = nil
+	gm.nodes[nindex] = nil
 	n = nil
 }
 
-func (gm *GraphManager) FindNode(name string) *Node {
-	return nil
+func (gm *GraphManager) FindNode(nindex string) *Node {
+	n, ok := gm.nodes[nindex]
+	//if local
+	if ok == true {
+		return n
+	}
+	//otherwise, get from db
+	return gm.GetNode(nindex)
 }
 
-func (gm *GraphManager) UpdateNode(n *Node) bool {
+//bulk update - pushes everything to database
+func (gm *GraphManager) UpdateNode(n *Node) Error {
+
+	e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
 	return true
 }
 
-func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte){
+//pushes change of single prop to db
+func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) {
 
 }
 
 func (gm *GraphManager) GetNode(index string) *Node {
-	nodeIdx, err := gm.client.Hget("node:"+index, "index")
+	nodeIdx, err := gm.client.Hget(node_s+index, props_s)
 
-	if err != nil {
+	if err != nil || nodeIdx == nil {
 		return nil
 	}
 
 	node := new(Node)
-	node.id = string(nodeIdx)
-	gm.nodes[node.id] = node
+	node.SetID(nodeIdx)
+	gm.nodes[nodeIdx] = node
 	return node
 }
 
@@ -89,17 +125,43 @@ func (gm *GraphManager) AddNeighbor(node *Node, edge *Edge) {
 
 }
 
-func (gm *GraphManager) GetNeighbors(node *Node) []*Node{
+func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
 
 }
 
 //EDGE MANAGEMENT
 
-func (gm *GraphManager) CreateEdge() *Edge {
-	return nil
+func (gm *GraphManager) AddEdge(e *Edge) {
+
+	index := gm.GetNextIndex()
+	eindex := edge_s + index
+	//props := e.GetPropMap()
+	weight := e.GetWeight()
+
+	gm.client.Hset(eindex, "weight", []byte(weight))
+
+	//Add node to index
+	gm.client.Sadd(edges_s, []byte(eindex))
+
+	//Local
+	e.SetId(eindex)
+	gm.edges[eindex] = e
 }
 
 func (gm *GraphManager) DeleteEdge(e *Edge) {
+
+	eindex = e.GetId()
+
+	//remove locally
+	gm.edges[eindex] = nil
+
+	//remove from database
+	gm.client.Del(eindex)
+
+	//remove from database's edge-index
+	gm.client.Srem(edges_s, eindex)
+
+	e = nil
 }
 
 func (gm *GraphManager) FindEdge(id int) *Edge {
@@ -114,7 +176,19 @@ func (gm *GraphManager) GetEdge(id int) *Edge {
 	return nil
 }
 
+func (gm *GraphManager) GetNodeEdges(n *Node) map[string][]*Edge {
+
+	ret := make(map[string][]*Edge, len(gm.edges))
+	//for each edge, classify and add edge pointer to correct slice
+	for i := 0; i < len(gm.edges); i++ {
+		typ := gm.edges[i].GetType()
+		ret[typ] = append(ret[typ], gm.edges[i])
+	}
+	return ret
+}
+
 func (gm *GraphManager) ClearAll() {
+	gm.client.Set(currIndex_s, []byte("0"))
 	gm.client.Flushdb()
 	gm.nodes = nil
 	gm.edges = nil

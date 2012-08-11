@@ -72,3 +72,50 @@ func TestClear(t *testing.T) {
 		t.Error("GraphManager did not ClearAll")
 	}
 }
+
+func TestDeleteNode(t *testing.T) {
+	gm.Initialize()
+
+	n := new(Node)
+	gm.AddNode(n)
+	index := n.id
+
+	gm.DeleteNode(n)
+
+	nDb := gm.GetNode(index)
+
+	if nDb != nil {
+		t.Errorf("found node id: %+v", nDb)
+		t.Error("GraphManager did not delete node")
+	}
+
+	gm.ClearAll()
+}
+
+func TestGetNode(t *testing.T) {
+	gm.Initialize()
+
+	n := new(Node)
+	gm.AddNode(n)
+	index := n.id
+
+	nDb := gm.GetNode(index)
+
+	if nDb.id != n.id {
+		t.Error("GraphManager did not get node correctly")
+	}
+
+	gm.ClearAll()
+}
+
+func TestAddEdge(t *testing.T) {
+	gm.Initialize()
+	e := new(Edge)
+	gm.AddEdge(e)
+
+	if e.id != "0" {
+		t.Errorf("GraphManager: id 0 was %s", e.id)
+	}
+
+	gm.ClearAll()
+}
