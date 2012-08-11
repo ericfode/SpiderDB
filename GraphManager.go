@@ -101,8 +101,14 @@ func (gm *GraphManager) UpdateNode(n *Node) Error {
 }
 
 //pushes change of single prop to db
-func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) {
+func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) error {
+	if n.GetId() == nil {
+		return &NodeNotAddedToDBError{e}
+	}
 
+	nindex := node_s + n.GetId()
+
+	gm.client.Hset(nindex, prop, value)
 }
 
 func (gm *GraphManager) GetNode(index string) *Node {
@@ -133,15 +139,23 @@ func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
 
 func (gm *GraphManager) AddEdge(e *Edge) {
 
+	//Database
 	index := gm.GetNextIndex()
-	eindex := edge_s + index
-	//props := e.GetPropMap()
-	weight := e.GetWeight()
+	nindex := edge_s + index
+	props := e.GetPropMap()
 
-	gm.client.Hset(eindex, "weight", []byte(weight))
+	//Add edge props to database edge
+	for k, v := range props {
+		gm.client.Hset(eindex, k, v)
+	}
 
 	//Add node to index
 	gm.client.Sadd(edges_s, []byte(eindex))
+
+	//TODO: Add links to adj Matrix
+	//
+	//
+	//
 
 	//Local
 	e.SetId(eindex)
@@ -170,6 +184,16 @@ func (gm *GraphManager) FindEdge(id int) *Edge {
 
 func (gm *GraphManager) UpdateEdge(e *Edge) bool {
 	return true
+}
+
+func (gm *GraphManager) UpdateEdgeProp(e *Edge, prop string, value []byte) error {
+	if e.GetId() == nil {
+		return &EdgeNotAddedToDBError{e}
+	}
+
+	nindex := edge_s + e.GetId()
+
+	gm.client.Hset(nindex, prop, value)
 }
 
 func (gm *GraphManager) GetEdge(id int) *Edge {
