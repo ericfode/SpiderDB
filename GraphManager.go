@@ -12,6 +12,11 @@ package spiderDB
 
 import "github.com/alphazero/Go-Redis"
 
+const currIndex "currIndex"
+
+type KeyNotFoundError string
+
+
 //Initializes database at startup
 
 type GraphManager struct {
@@ -25,11 +30,14 @@ func (gm *GraphManager) Initialize() {
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set("currIndex", []byte("0"))
 
+	gm.Connect(port, ipAddr, dbNum)	
+
 	gm.nodes = make(map[string]*Node)
 	gm.edges = make(map[string]*Edge)
 }
 
 func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
+	gm.client, _ = redis.NewSynchClient()
 }
 
 func (gm *GraphManager) GetNextIndex() string {
@@ -44,18 +52,20 @@ func (gm *GraphManager) GetNextIndex() string {
 func (gm *GraphManager) AddNode(n *Node) {
 	//Database
 	index := gm.GetNextIndex()
+	nindex := "node:" + index
 	props := n.GetPropMap()
 
-	gm.client.Hset("node:"+index, "props", props[index])
-	//gm.client.Hset("node:"+string(index), "index", []byte(index))
+	//Add node props to database node
+	for k, v := range props {
+		gm.client.Hset(nindex, k, v)
+	}
 
-	//Add node to index
-	gm.client.Sadd("nodes", props[string(index)])
-	//gm.client.Sadd("nodes", []byte(index))
+	//Add node to node-index
+	gm.client.Sadd("nodes", []byte(index))
 
 	//Local
 	n.SetID(index)
-	gm.nodes[string(index)] = n
+	gm.nodes[index] = n
 }
 
 func (gm *GraphManager) DeleteNode(n *Node) {
@@ -78,10 +88,14 @@ func (gm *GraphManager) FindNode(index string) *Node {
 	return gm.GetNode(index)
 }
 
-func (gm *GraphManager) UpdateNode(n *Node) bool {
+//bulk update - pushes everything to database
+func (gm *GraphManager) UpdateNode(n *Node) Error {
+	
+	e := gm.client.Hset(n.GetID(), "props", n.GetPropMap())
 	return true
 }
 
+//pushes change of single prop to db
 func (gm *GraphManger) UpdateNodeProp(n *Node, prop String, value []byte) {
 
 }
