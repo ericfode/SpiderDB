@@ -96,7 +96,6 @@ func (gm *GraphManager) FindNode(nindex string) *Node {
 //bulk update - pushes everything to database
 func (gm *GraphManager) UpdateNode(n *Node) Error {
 
-	
 	e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
 	return true
 }
@@ -135,7 +134,7 @@ func (gm *GraphManager) GetNeighbors(node *Node) []*Node {
 func (gm *GraphManager) AddEdge(e *Edge) {
 
 	index := gm.GetNextIndex()
-	eindex := edge_s+index
+	eindex := edge_s + index
 	//props := e.GetPropMap()
 	weight := e.GetWeight()
 
@@ -154,10 +153,10 @@ func (gm *GraphManager) DeleteEdge(e *Edge) {
 	eindex = e.GetId()
 
 	//remove locally
-	gm.edges[ eindex ] = nil
+	gm.edges[eindex] = nil
 
 	//remove from database
-	gm.client.Del( eindex )
+	gm.client.Del(eindex)
 
 	//remove from database's edge-index
 	gm.client.Srem(edges_s, eindex)

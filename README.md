@@ -9,6 +9,7 @@ TODO: Create Response to hash function for getting nodes
 
 1. Define Node API
 
+TODO: Create function for converting byte arrays to ints more quickly
 
 #. Modify GM to work with Node API
 	+ Reference functions defined by Node API instead of properties
