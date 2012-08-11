@@ -13,7 +13,7 @@ type SocialNode struct {
 }
 // has this node been added to the gm?
 func (n *SocialNode) IsReged() bool {
-
+ 
 }
 
 func (n *SocialNode) GetID() string {
@@ -61,7 +61,7 @@ func (n *SocialNode) GetAwesomeness() int{
 func (n *SocialNode) SetAwesomeness(awe int){
 	n.Awesomeness = awe
 	if(n.IsReged()){
-		GM.UpdateNodeProp(n,"Name", []byte(strconv.Itoa(awe))
+		GM.UpdateNodeProp(n,"Name", []byte(strconv.Itoa(awe)))
 	}
 }
 
@@ -73,7 +73,7 @@ func (n *SocialNode) SetEdges(edges map[string][]*Edge){
 //DB only function
 func (n *SocialNode) AddEdges(edges []*Edge) {
 	for _,edge := range(edges){
-		append(n.Edges[edge.GetType()],edge))
+		append(n.Edges[edge.GetType()],edge)
 	}
 }	
 
@@ -81,8 +81,7 @@ func (n *SocialNode) AddEdges(edges []*Edge) {
 func (n *SocialNode) RemoveEdge(edges []*Edge){
 	for _,findedge := range(edges){
 		for index, edge := range(n.Edges[findedge.GetType()]){
-			if(edge.GetId() == findedge.GetId())
-			{
+			if (edge.GetId() == findedge.GetId()){
 				n.Edges[findedge.GetType][index] = nil
 			}
 		} 
