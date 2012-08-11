@@ -7,21 +7,26 @@ type SocialNode struct {
 	Name        string
 	Email       string
 	Awesomeness int
-	Edges       map[string][]*Edge
-	GM          *GraphBackend
+	Edges       map[string][]Edge
+	GM          GraphBackend
 }
 
-func NewSocialNode(name string, email string, awe int) *SocialNode {
+func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialNode {
 	sn := new(SocialNode)
 	sn.Awesomeness = awe
 	sn.Name = name
 	sn.Email = email
+	sn.GM = gm
 	return sn
+}
+
+func (n *SocialNode) SetGM(gm GraphBackend) {
+	n.GM = gm
 }
 
 // has this node been added to the gm?
 func (n *SocialNode) IsReged() bool {
-
+	return true
 }
 
 func (n *SocialNode) GetID() string {
@@ -71,22 +76,22 @@ func (n *SocialNode) SetAwesomeness(awe int) {
 }
 
 //DB only function
-func (n *SocialNode) SetEdges(edges map[string][]*Edge) {
+func (n *SocialNode) SetEdges(edges map[string][]Edge) {
 	n.Edges = edges
 }
 
 //DB only function
-func (n *SocialNode) AddEdges(edges []*Edge) {
-	for _, edge := range edges {
-		append(n.Edges[edge.GetType()], edge)
-	}
+func (n *SocialNode) AddEdges(edges []Edge) {
+	//	for _, edge := range edges {
+	//		append(n.Edges[edge.GetType()], edge)
+	//	}
 }
 
-func (n *SocialNode) RemoveEdge(edges []*Edge) {
+func (n *SocialNode) RemoveEdge(edges []Edge) {
 	for _, findedge := range edges {
 		for index, edge := range n.Edges[findedge.GetType()] {
-			if edge.GetId() == findedge.GetId() {
-				n.Edges[findedge.GetType][index] = nil
+			if edge.GetID() == findedge.GetID() {
+				n.Edges[findedge.GetType()][index] = nil
 			}
 		}
 	}
@@ -105,5 +110,5 @@ func (n *SocialNode) SetPropMap(props map[string][]byte) {
 	n.Id = string(props["Id"])
 	n.Name = string(props["Name"])
 	n.Email = string(props["Email"])
-	n.Awesomeness = strconv.Atoi(string(props["Awesomeness"]))
+	n.Awesomeness, _ = strconv.Atoi(string(props["Awesomeness"]))
 }

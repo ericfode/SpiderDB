@@ -99,7 +99,6 @@ func (gm *GraphManager) FindNode(nindex string) Node {
 
 //bulk update - pushes everything to database
 func (gm *GraphManager) UpdateNode(n Node) error {
-	n.GetID()
 
 	//e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
 	return nil
@@ -107,14 +106,15 @@ func (gm *GraphManager) UpdateNode(n Node) error {
 
 //pushes change of single prop to db
 func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error {
-
-	if n.GetId() == "" {
-		return &NodeNotAddedToDBError{e}
+	id := n.GetID()
+	if id == "" {
+		//	return &NodeNotAddedToDBError{n}
 	}
 
-	nindex := node_s + n.GetId()
+	nindex := node_s + id
 
 	gm.client.Hset(nindex, prop, value)
+	return nil
 }
 
 func (gm *GraphManager) GetNode(index string) Node {
@@ -123,11 +123,12 @@ func (gm *GraphManager) GetNode(index string) Node {
 	if err != nil || nodeIdx == nil {
 		return nil
 	}
-
-	node := new(Node)
+	/* Need to add constructor stuff
 	node.SetID(nodeIdx)
 	gm.nodes[nodeIdx] = node
 	return node
+	*/
+	return nil
 }
 
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
@@ -136,31 +137,30 @@ func (gm *GraphManager) GetNode(index string) Node {
 
 //attach bidirectional Neighbor
 //think about using this same pattern (passing a type) for other funcs 
-func (gm *GraphManager) Attach(node1 Node, node2 Node, edge Edge) {
+func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 	//decide if being able to add nodes and edges that don't have ids
 	//into the data base is a good idea or if making the user explicitly
 	//do it is a good idea
 	//i think that having different behavior then just attaching a neightbor
 	//is a bad idea
-	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), e.GetId())
+	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
 	if !e.IsDirected() {
-		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), e.GetId())
+		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
 	}
-	node1.AddEdges(edge)
-	node2.AddEdges(edge)
-	edge.SetFirstNode(node1)
-	edge.SetSecondNode(node2)
+	node1.AddEdges([]Edge{e})
+	node2.AddEdges([]Edge{e})
+	e.SetFirstNode(node1)
+	e.SetSecondNode(node2)
+
 }
 
-func (gm *GraphManager) GetNeighbors(node Node) ([]*Connection, error) {
-	conns, ok := gm.client.Hgetall(key)
-	if ok != nil {
-		return _, ok.Error()
-	}
-	for index, val := range conns {
+func (gm *GraphManager) GetNeighbors(node Node) []Connection {
+	//	conns, _ := gm.client.Hgetall(node_s + node.GetID())
 
-	}
+	//	for _, _ := range conns {
 
+	//	}
+	return nil
 }
 
 //EDGE MANAGEMENT
@@ -169,7 +169,7 @@ func (gm *GraphManager) AddEdge(e Edge) {
 
 	//Database
 	index := gm.GetNextIndex()
-	nindex := edge_s + index
+	eindex := edge_s + index
 	props := e.GetPropMap()
 
 	//Add edge props to database edge
@@ -181,13 +181,13 @@ func (gm *GraphManager) AddEdge(e Edge) {
 	gm.client.Sadd(edges_s, []byte(eindex))
 
 	//Local
-	e.SetId(eindex)
+	e.SetID(string(index))
 	gm.edges[eindex] = e
 }
 
 func (gm *GraphManager) DeleteEdge(e Edge) {
 
-	eindex = e.GetId()
+	eindex := e.GetID()
 
 	//remove locally
 	gm.edges[eindex] = nil
@@ -196,7 +196,7 @@ func (gm *GraphManager) DeleteEdge(e Edge) {
 	gm.client.Del(eindex)
 
 	//remove from database's edge-index
-	gm.client.Srem(edges_s, eindex)
+	gm.client.Srem(edges_s, []byte(eindex))
 
 	e = nil
 }
@@ -210,13 +210,14 @@ func (gm *GraphManager) UpdateEdge(e Edge) bool {
 }
 
 func (gm *GraphManager) UpdateEdgeProp(e Edge, prop string, value []byte) error {
-	if e.GetId() == nil {
-		return &EdgeNotAddedToDBError{e}
+	if e.GetID() == "" {
+		//		return &EdgeNotAddedToDBError{e}
 	}
 
-	nindex := edge_s + e.GetId()
+	nindex := edge_s + e.GetID()
 
 	gm.client.Hset(nindex, prop, value)
+	return nil
 }
 
 func (gm *GraphManager) GetEdge(id int) Edge {
@@ -225,13 +226,16 @@ func (gm *GraphManager) GetEdge(id int) Edge {
 
 func (gm *GraphManager) GetNodeEdges(n Node) map[string][]Edge {
 
-	ret := make(map[string][]*Edge, len(gm.edges))
+	//	ret := make(map[string][]Edge, len(gm.edges))
 	//for each edge, classify and add edge pointer to correct slice
-	for i := 0; i < len(gm.edges); i++ {
-		typ := gm.edges[i].GetType()
-		ret[typ] = append(ret[typ], gm.edges[i])
-	}
-	return ret
+	/*
+		for i := 0; i < len(gm.edges); i++ {
+			typ := gm.edges[i].GetType()
+			ret[typ] = append(ret[typ], gm.edges[i])
+		}
+		return ret
+	*/
+	return nil
 }
 
 func (gm *GraphManager) ClearAll() {
