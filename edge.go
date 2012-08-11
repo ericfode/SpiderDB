@@ -1,11 +1,10 @@
 package spiderDB
 
-type Edge interface{
+type Edge interface {
 	GetId() string
 	SetId(id string)
 	GetWeight() int
-	SetWeight(int weight)
+	SetWeight(weight int)
 	GetType() string
-	SetType(type string)
+	SetType(typestr string)
 }
-
