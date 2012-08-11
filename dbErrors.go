@@ -10,7 +10,13 @@ type KeyNotFoundError string
 
 type dbError string
 
-func (e KeyNotFoundError) Error() string {}
+func (e dbError) Error() string {
+	return fmt.Sprintf("%s", e)
+}
+
+func (e KeyNotFoundError) Error() string {
+	return fmt.Sprintf("%s", e)
+}
 
 func (e *EdgeNotAddedToDBError) Error() string {
 	return fmt.Sprintf("Edge %v has not been added to the db, run AddEdge first", e)

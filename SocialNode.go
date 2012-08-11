@@ -8,7 +8,7 @@ type SocialNode struct {
 	Email       string
 	Awesomeness int
 	Edges       map[string][]*Edge
-	GM          *GraphManager
+	GM          *GraphBackend
 }
 
 func NewSocialNode(name string, email string, awe int) *SocialNode {
