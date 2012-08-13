@@ -17,4 +17,4 @@ type Edge interface {
 	SetSecondNode(node Node)
 }
 
-type EdgeConstructor func(string id) Edge
+type EdgeConstructor func(id string) Edge
