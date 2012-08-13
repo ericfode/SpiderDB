@@ -141,7 +141,7 @@ func TestGetNode(t *testing.T) {
 		t.Errorf("WTF nDb is nil in TestGetNode")
 		return
 	}
-	if nDb.GetID() == "0"{
+	if nDb.GetID() == "0" {
 		t.Error("GraphManager did not get node correctly")
 		return
 	}
@@ -159,10 +159,8 @@ func TestAddSingleEdge(t *testing.T) {
 	gm.AddEdge(edge)
 
 	if edge.GetID() != "0" {
-		t.Errorf("GraphManager: id 0 was %i", edge.GetID())
+		t.Errorf("GraphManager: id 0 was %d", edge.GetID())
 	}
-
-	gm.ClearAll()
 }
 
 func TestAddEdges(t *testing.T) {

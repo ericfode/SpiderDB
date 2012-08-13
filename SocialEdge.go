@@ -11,10 +11,15 @@ type SocialEdge struct {
 	sndNode Node
 }
 
-func SocialEdgeConst(id string) Edge {
+func SocialEdgeConst(id string, GM GraphBackend) Edge {
 	edge := new(SocialEdge)
+	edge.SetGM(GM)
 	edge.SetID(id)
 	return edge
+}
+
+func (e *SocialEdge) SetGM(gm GraphBackend) {
+	e.GM = gm
 }
 
 func (s *SocialEdge) GetID() string {
