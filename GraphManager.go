@@ -5,9 +5,6 @@ package spiderDB
 //  + make type keys and type set
 //  + make sorted set of all nodes with type id as score
 //  + when inserting node, add to sorted set 
-//  + add register/deregister type functions
-//      + deregister should only work if no nodes of that type exist
-//      + register should only work if type does not already exist
 
 import "github.com/alphazero/Go-Redis"
 
