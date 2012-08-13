@@ -3,6 +3,7 @@ package spiderDB
 import "strconv"
 
 //TODO: rename struct vars to lowercase
+//TODO: add commit function
 type SocialNode struct {
 	Id          string
 	Name        string
@@ -21,7 +22,7 @@ func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialN
 	return sn
 }
 
-func SocialNodeConst(id string,GM GraphBackend) Node{
+func SocialNodeConst(id string, GM GraphBackend) Node {
 	sn := new(SocialNode)
 	sn.SetGM(GM)
 	sn.SetID(id)
@@ -43,9 +44,9 @@ func (n *SocialNode) GetID() string {
 
 func (n *SocialNode) SetID(id string) {
 	n.Id = id
-	if n.IsReged() {
+	/*if n.IsReged() {
 		n.GM.UpdateNodeProp(n, "Id", []byte(n.Id))
-	}
+	}*/
 }
 
 func (n *SocialNode) GetName() string {
@@ -54,9 +55,9 @@ func (n *SocialNode) GetName() string {
 
 func (n *SocialNode) SetName(name string) {
 	n.Name = name
-	if n.IsReged() {
+	/*if n.IsReged() {
 		n.GM.UpdateNodeProp(n, "Name", []byte(name))
-	}
+	}*/
 }
 
 func (n *SocialNode) GetEmail() string {
@@ -65,9 +66,9 @@ func (n *SocialNode) GetEmail() string {
 
 func (n *SocialNode) SetEmail(email string) {
 	n.Email = email
-	if n.IsReged() {
+	/*if n.IsReged() {
 		n.GM.UpdateNodeProp(n, "Email", []byte(email))
-	}
+	}*/
 }
 
 func (n *SocialNode) GetAwesomeness() int {
