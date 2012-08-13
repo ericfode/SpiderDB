@@ -4,6 +4,20 @@ import "testing"
 
 var gm *GraphManager
 
+func initTestEdges(gm GraphBackend) []*SocialEdge {
+	var testEdges = []*SocialEdge{
+		&SocialEdge{weight: 43, typ: "knows", GM: gm},
+		&SocialEdge{weight: 110, typ: "likes", GM: gm},
+		&SocialEdge{weight: 79, typ: "hates", GM: gm},
+		&SocialEdge{weight: 2, typ: "stalks", GM: gm},
+		&SocialEdge{weight: 53, typ: "knows", GM: gm},
+		&SocialEdge{weight: 89, typ: "likes", GM: gm},
+		&SocialEdge{weight: 12, typ: "hates", GM: gm},
+		&SocialEdge{weight: 99, typ: "stalks", GM: gm},
+	}
+	return testEdges
+}
+
 func initTestNodes(gm GraphBackend) []*SocialNode {
 	var testNodes = []*SocialNode{
 		&SocialNode{Name: "Bill", Email: "bill@billisAwsome.com", Awesomeness: 40, GM: gm},
@@ -100,11 +114,11 @@ func TestDeleteNode(t *testing.T) {
 
 }
 
-func TestNodeConstructor(t *testing.T){
+func TestNodeConstructor(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
-	node := SocialNodeConst("42",gm )
+	node := SocialNodeConst("42", gm)
 	if node == nil {
 		t.Error("Node is nil")
 	}
@@ -127,23 +141,55 @@ func TestGetNode(t *testing.T) {
 		t.Errorf("WTF nDb is nil in TestGetNode")
 		return
 	}
-	if nDb.GetID() == "0"{
+	if nDb.GetID() == "0" {
 		t.Error("GraphManager did not get node correctly")
 		return
 	}
 
 }
 
-/*
-func TestAddEdge(t *testing.T) {
+func TestAddSingleEdge(t *testing.T) {
+	gm = new(GraphManager)
 	gm.Initialize()
-	e := new(Edge)
-	gm.AddEdge(e)
+	defer gm.ClearAll()
 
-	if e.GetID() != "0" {
-		t.Errorf("GraphManager: id 0 was %s", e.GetID())
+	e := initTestEdges(gm)
+	edge := e[0]
+
+	gm.AddEdge(edge)
+
+	if edge.GetID() != "0" {
+		t.Errorf("GraphManager: id 0 was %d", edge.GetID())
+	}
+}
+
+func TestAddEdges(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	e := initTestEdges(gm)
+
+	gm.AddEdge(e[0])
+	gm.AddEdge(e[1])
+	gm.AddEdge(e[2])
+	gm.AddEdge(e[3])
+
+	if e[0].GetID() != "0" {
+		t.Errorf("edge id 0 was %d", e[0].GetID())
+		return
+	}
+	if e[1].GetID() != "1" {
+		t.Errorf("edge id 1 was %d", e[1].GetID())
+		return
+	}
+	if e[2].GetID() != "2" {
+		t.Errorf("edge id 2 was %d", e[2].GetID())
+		return
+	}
+	if e[3].GetID() != "3" {
+		t.Errorf("edge id 3 was %d", e[3].GetID())
+		return
 	}
 
-	gm.ClearAll()
 }
-*/

@@ -2,7 +2,6 @@ package spiderDB
 
 //TO-DO:
 //   
-//
 //  + make type keys and type set
 //  + make sorted set of all nodes with type id as score
 //  + when inserting node, add to sorted set 
