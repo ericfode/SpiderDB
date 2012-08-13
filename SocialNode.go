@@ -2,6 +2,7 @@ package spiderDB
 
 import "strconv"
 
+//TODO: rename struct vars to lowercase
 type SocialNode struct {
 	Id          string
 	Name        string
@@ -17,6 +18,12 @@ func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialN
 	sn.Name = name
 	sn.Email = email
 	sn.GM = gm
+	return sn
+}
+
+func SocialNodeConst(id string) Node{
+	sn := new(SocialNode)
+	sn.SetID(id)
 	return sn
 }
 
@@ -36,7 +43,7 @@ func (n *SocialNode) GetID() string {
 func (n *SocialNode) SetID(id string) {
 	n.Id = id
 	if n.IsReged() {
-		n.GM.UpdateNodeProp(n, "Id", []byte(id))
+		n.GM.UpdateNodeProp(n, "Id", []byte(n.Id))
 	}
 }
 

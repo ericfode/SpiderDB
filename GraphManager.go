@@ -35,7 +35,7 @@ func (gm *GraphManager) Initialize() {
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set(currIndex_s, []byte("0"))
 
-	gm.Connect(00, "0.0.0.0", 0)
+	gm.Connect(6379, "127.0.0.1", 13)
 
 	gm.nodes = make(map[string]Node)
 	gm.edges = make(map[string]Edge)
@@ -70,7 +70,7 @@ func (gm *GraphManager) AddNode(n Node) {
 	gm.client.Sadd(nodes_s, []byte(nindex))
 
 	//Local
-	n.SetID(nindex)
+	n.SetID(index)
 	gm.nodes[nindex] = n
 }
 
