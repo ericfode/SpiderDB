@@ -4,6 +4,20 @@ import "testing"
 
 var gm *GraphManager
 
+func initTestEdges(gm GraphBackend) []*SocialEdge {
+	var testEdges = []*SocialEdge{
+		&SocialEdge{weight: 43, typ: "knows", GM: gm},
+		&SocialEdge{weight: 110, typ: "likes", GM: gm},
+		&SocialEdge{weight: 79, typ: "hates", GM: gm},
+		&SocialEdge{weight: 2, typ: "stalks", GM: gm},
+		&SocialEdge{weight: 53, typ: "knows", GM: gm},
+		&SocialEdge{weight: 89, typ: "likes", GM: gm},
+		&SocialEdge{weight: 12, typ: "hates", GM: gm},
+		&SocialEdge{weight: 99, typ: "stalks", GM: gm},
+	}
+	return testEdges
+}
+
 func initTestNodes(gm GraphBackend) []*SocialNode {
 	var testNodes = []*SocialNode{
 		&SocialNode{Name: "Bill", Email: "bill@billisAwsome.com", Awesomeness: 40, GM: gm},
@@ -100,11 +114,11 @@ func TestDeleteNode(t *testing.T) {
 
 }
 
-func TestNodeConstructor(t *testing.T){
+func TestNodeConstructor(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
-	node := SocialNodeConst("42",gm )
+	node := SocialNodeConst("42", gm)
 	if node == nil {
 		t.Error("Node is nil")
 	}
@@ -135,11 +149,14 @@ func TestGetNode(t *testing.T) {
 
 }
 
-/*
 func TestAddEdge(t *testing.T) {
+	gm = new(GraphManager)
 	gm.Initialize()
-	e := new(Edge)
-	gm.AddEdge(e)
+	defer gm.ClearAll()
+
+	e := initTestEdges(gm)
+
+	gm.AddEdge(e[0])
 
 	if e.GetID() != "0" {
 		t.Errorf("GraphManager: id 0 was %s", e.GetID())
@@ -147,4 +164,3 @@ func TestAddEdge(t *testing.T) {
 
 	gm.ClearAll()
 }
-*/
