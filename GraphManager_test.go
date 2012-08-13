@@ -149,7 +149,24 @@ func TestGetNode(t *testing.T) {
 
 }
 
-func TestAddEdge(t *testing.T) {
+func TestAddSingleEdge(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	e := initTestEdges(gm)
+	edge := e[0]
+
+	gm.AddEdge(edge)
+
+	if edge.GetID() != "0" {
+		t.Errorf("GraphManager: id 0 was %i", edge.GetID())
+	}
+
+	gm.ClearAll()
+}
+
+func TestAddEdges(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
@@ -157,10 +174,25 @@ func TestAddEdge(t *testing.T) {
 	e := initTestEdges(gm)
 
 	gm.AddEdge(e[0])
+	gm.AddEdge(e[1])
+	gm.AddEdge(e[2])
+	gm.AddEdge(e[3])
 
-	if e.GetID() != "0" {
-		t.Errorf("GraphManager: id 0 was %s", e.GetID())
+	if e[0].GetID() != "0" {
+		t.Errorf("edge id 0 was %d", e[0].GetID())
+		return
+	}
+	if e[1].GetID() != "1" {
+		t.Errorf("edge id 1 was %d", e[1].GetID())
+		return
+	}
+	if e[2].GetID() != "2" {
+		t.Errorf("edge id 2 was %d", e[2].GetID())
+		return
+	}
+	if e[3].GetID() != "3" {
+		t.Errorf("edge id 3 was %d", e[3].GetID())
+		return
 	}
 
-	gm.ClearAll()
 }

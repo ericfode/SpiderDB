@@ -6,7 +6,7 @@ type SocialEdge struct {
 	id      int
 	weight  int
 	typ     string
-	GM      *GraphBackend
+	GM      GraphBackend
 	fstNode Node
 	sndNode Node
 }
@@ -31,7 +31,7 @@ func (s *SocialEdge) GetWeight() int {
 }
 
 func (s *SocialEdge) SetWeight(weight string) {
-	s.weight,_ = strconv.Atoi(weight)
+	s.weight, _ = strconv.Atoi(weight)
 }
 func (s *SocialEdge) GetType() string {
 	return s.typ
