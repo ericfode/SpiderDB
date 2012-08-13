@@ -2,6 +2,7 @@ package spiderDB
 
 import "testing"
 
+//TODO: update tests to use Node.Equals instead of just compairing id
 var gm *GraphManager
 
 func initTestEdges(gm GraphBackend) []*SocialEdge {
@@ -138,11 +139,13 @@ func TestGetNode(t *testing.T) {
 		return
 	}
 	if nDb == nil {
-		t.Errorf("WTF nDb is nil in TestGetNode")
+		t.Errorf("nDb is nil in TestGetNode")
 		return
 	}
-	if nDb.GetID() == "0" {
-		t.Error("GraphManager did not get node correctly")
+	if !nDb.Equals(n) {
+		t.Errorf(`Saved node and node from GetAllNodes not Equal.../n
+					Expected : %v /n
+					Actual : %v`, n, nDb)
 		return
 	}
 
@@ -225,4 +228,56 @@ func TestAddEdges(t *testing.T) {
 		return
 	}
 
+}
+
+func TestGetAllNodesSingle(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+	nodes := initTestNodes(gm)
+	gm.AddNode(nodes[0])
+	allNodes, err := gm.GetAllNodes(SocialNodeConst)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if len(allNodes) != 1 {
+		t.Errorf("Unexpected length (should have been 1) was %d", len(allNodes))
+		return
+	}
+	if allNodes[0] == nil {
+		t.Error("Got node was nil")
+	}
+	if !allNodes[0].Equals(nodes[0]) {
+		t.Errorf(`Saved node and node from GetAllNodes not Equal.../n
+					Expected : %v /n
+					Actual : %v`, nodes[0], allNodes[0])
+		return
+	}
+}
+
+func TestGetAllNodesGroup(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+	nodes := initTestNodes(gm)
+	for _, val := range nodes {
+		gm.AddNode(val)
+	}
+	allNodes, err := gm.GetAllNodes(SocialNodeConst)
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if len(allNodes) != len(nodes) {
+		t.Errorf("len(allNodes) expected: %d\n actual:%d", len(nodes), len(allNodes))
+		return
+	}
+	for i, val := range allNodes {
+		if !val.Equals(nodes[StringToInt(val.GetID())]) {
+			t.Errorf(`Saved node and node from GetAllNodes not Equals.../n
+					Expected : %v /n
+					Actual : %v /n
+					Index : %d`, nodes[StringToInt(val.GetID())], val, i)
+			return
+		}
+	}
 }

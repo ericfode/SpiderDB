@@ -12,6 +12,8 @@ type Node interface {
 	SetPropMap(props map[string][]byte)
 
 	SetGM(gm GraphBackend)
+
+	Equals(other Node) bool
 }
 
 type NodeConstructor func(id string, gm GraphBackend) Node
