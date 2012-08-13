@@ -2,14 +2,16 @@ package spiderDB
 
 import "fmt"
 
-type EdgeNotAddedToDBError Edge
+type KeyNotFoundError struct { Key string }
 
-type NodeNotAddedToDBError Node
+type dbError struct {
+	ErrStr string
+	}
 
-type KeyNotFoundError string
+func (e *dbError) Error() string {
+	return fmt.Sprintf("%s", e.ErrStr)
+}
 
-type dbError string
-
-func (e dbError) Error() string {
-	return fmt.Sprintf("%s", e)
+func (e *KeyNotFoundError) Error() string {
+	return fmt.Sprintf("%s Not found", e.Key)
 }
