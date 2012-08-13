@@ -24,6 +24,7 @@ func initTestNodes(gm GraphBackend) []*SocialNode {
 func TestAddSingleNode(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
+	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
 
 	gm.AddNode(nodes[0])
@@ -32,14 +33,15 @@ func TestAddSingleNode(t *testing.T) {
 
 	if nodes[0].GetID() == "" {
 		t.Errorf("id was nil on AddNode")
+		return
 	}
-	gm.ClearAll()
 }
 
 func TestAddNodes(t *testing.T) {
 
 	gm = new(GraphManager)
 	gm.Initialize()
+	defer gm.ClearAll()
 	n := initTestNodes(gm)
 
 	gm.AddNode(n[0])
@@ -51,18 +53,21 @@ func TestAddNodes(t *testing.T) {
 
 	if n[0].GetID() != "0" {
 		t.Errorf("id 0 was %s", n[0].GetID())
+		return
 	}
 	if n[1].GetID() != "1" {
 		t.Errorf("id 1 was %s", n[1].GetID())
+		return
 	}
 	if n[2].GetID() != "2" {
 		t.Errorf("id 2 was %s", n[2].GetID())
+		return
 	}
 	if n[3].GetID() != "3" {
 		t.Errorf("id 3 was %s", n[3].GetID())
+		return
 	}
 
-	gm.ClearAll()
 }
 
 func TestClear(t *testing.T) {
@@ -77,6 +82,7 @@ func TestClear(t *testing.T) {
 func TestDeleteNode(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
+	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
 	n := nodes[0]
 	gm.AddNode(n)
@@ -89,29 +95,44 @@ func TestDeleteNode(t *testing.T) {
 	} else if nDb != nil {
 		t.Errorf("found node id: %+v", nDb)
 		t.Error("GraphManager did not delete node")
+		return
 	}
 
-	gm.ClearAll()
+}
+
+func TestNodeConstructor(t *testing.T){
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+	node := SocialNodeConst("42",gm )
+	if node == nil {
+		t.Error("Node is nil")
+	}
 }
 
 func TestGetNode(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
+	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
 	n := nodes[0]
 	gm.AddNode(n)
 	index := n.GetID()
-
+	t.Logf("%v", n)
 	nDb, err := gm.GetNode(index, SocialNodeConst)
-
 	if err != nil {
 		t.Error(err.Error())
+		return
+	}
+	if nDb == nil {
+		t.Errorf("WTF nDb is nil in TestGetNode")
+		return
 	}
 	if nDb.GetID() != n.GetID() {
 		t.Error("GraphManager did not get node correctly")
+		return
 	}
 
-	gm.ClearAll()
 }
 
 /*

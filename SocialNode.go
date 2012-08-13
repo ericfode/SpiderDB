@@ -14,15 +14,16 @@ type SocialNode struct {
 
 func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialNode {
 	sn := new(SocialNode)
+	sn.GM = gm
 	sn.Awesomeness = awe
 	sn.Name = name
 	sn.Email = email
-	sn.GM = gm
 	return sn
 }
 
-func SocialNodeConst(id string) Node{
+func SocialNodeConst(id string,GM GraphBackend) Node{
 	sn := new(SocialNode)
+	sn.SetGM(GM)
 	sn.SetID(id)
 	return sn
 }
