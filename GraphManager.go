@@ -29,10 +29,8 @@ type GraphManager struct {
 func (gm *GraphManager) Initialize() {
 	//var e error
 
-	gm.client, _ = redis.NewSynchClient()
-	gm.client.Set(currIndex_s, []byte("0"))
-
 	gm.Connect(6379, "127.0.0.1", 13)
+	gm.client.Set(currIndex_s, []byte("0"))
 
 	gm.nodes = make(map[string]Node)
 	gm.edges = make(map[string]Edge)
@@ -73,7 +71,7 @@ func (gm *GraphManager) AddNode(n Node) {
 
 func (gm *GraphManager) DeleteNode(n Node) {
 	//Database
-	nindex := node_s+n.GetID()
+	nindex := node_s + n.GetID()
 	gm.client.Srem(nodes_s, []byte(nindex))
 	gm.client.Del(nindex)
 	//Local
@@ -115,13 +113,14 @@ func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error 
 	gm.client.Hset(nindex, prop, value)
 	return nil
 }
+
 //TODO : breakout node_s + index 
 //TODO : rename nodes_s to somthing less ambiguous
 
-func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (Node, bool){
-	node := construct(string(hash[1]),gm)
+func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (Node, bool) {
+	node := construct(string(hash[1]), gm)
 	propMap := make(map[string][]byte)
-	for i := 0; i < len(hash); i +=2{
+	for i := 0; i < len(hash); i += 2 {
 		propMap[string(hash[i])] = hash[i+1]
 	}
 	node.SetPropMap(propMap)
@@ -129,13 +128,13 @@ func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (
 }
 
 func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, error) {
-	if exists , err := gm.client.Sismember(nodes_s,[]byte(node_s + index)); exists != true{
+	if exists, err := gm.client.Sismember(nodes_s, []byte(node_s+index)); exists != true {
 		return nil, &KeyNotFoundError{index}
-	} else if err != nil{
+	} else if err != nil {
 		return nil, err
 	}
 
-	hash, err := gm.client.Hgetall(node_s+index)
+	hash, err := gm.client.Hgetall(node_s + index)
 	if err != nil {
 		return nil, err
 	} else if hash == nil {

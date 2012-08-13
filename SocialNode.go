@@ -91,9 +91,9 @@ func (n *SocialNode) SetEdges(edges map[string][]Edge) {
 
 //DB only function
 func (n *SocialNode) AddEdges(edges []Edge) {
-	//	for _, edge := range edges {
-	//		append(n.Edges[edge.GetType()], edge)
-	//	}
+		for _, edge := range edges {
+			n.Edges[edge.GetType()] =append(n.Edges[edge.GetType()], edge)
+	}
 }
 
 func (n *SocialNode) RemoveEdge(edges []Edge) {
