@@ -7,7 +7,7 @@ package spiderDB
 //  + when inserting node, add to sorted set 
 
 import "github.com/alphazero/Go-Redis"
-
+import "strings"
 // consts (typo prevention)
 const currIndex_s = "currIndex"
 const node_s = "node:"
@@ -43,6 +43,11 @@ func (gm *GraphManager) GetNextIndex() string {
 	index, _ := gm.client.Get(currIndex_s)
 	gm.client.Incr(currIndex_s)
 
+	return string(index)
+}
+
+func (gm *GraphManager) GetCurIndex() string {
+	index, _ := gm.client.Get(currIndex_s)
 	return string(index)
 }
 
@@ -145,10 +150,13 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 	if !ok {
 		return nil, &dbError{"Something that should not be able to brake broke???"}
 	}
+	node.SetID(index)
 	gm.nodes[node_s+node.GetID()] = node
 	return node, nil
 
 }
+
+
 
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
 
@@ -269,3 +277,20 @@ func (gm *GraphManager) ClearAll() {
 
 //func ( gm *GraphManager ) addAdjEntry( )
 //func ( gm *GraphManager ) removeAdjEntry( )
+
+//FIXME: Nodes of multiple types will make this blow up need to do type 
+//thing talked about at the top of this file
+func (gm *GraphManager) GetAllNodes(construct NodeConstructor) ([]Node, error) {
+	nodeIDs, _ := gm.client.Smembers(nodes_s)
+	nodes := make([]Node, len(nodeIDs))
+	var err error
+	for i, v := range nodeIDs {
+		idx := strings.LastIndex(string(v), ":")
+		nodes[i], err = gm.GetNode(string(v)[idx+1:], construct)
+		if err != nil{
+			return nil, err
+		}
+	}
+	return nodes,nil
+}
+

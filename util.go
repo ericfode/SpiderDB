@@ -11,3 +11,8 @@ func BytesToInt(in []byte) int {
 	out, _ := strconv.Atoi(string(in))
 	return out
 }
+
+func StringToInt(in string) int {
+	out, _ := strconv.Atoi(in)
+	return out
+}

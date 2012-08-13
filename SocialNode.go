@@ -91,8 +91,8 @@ func (n *SocialNode) SetEdges(edges map[string][]Edge) {
 
 //DB only function
 func (n *SocialNode) AddEdges(edges []Edge) {
-		for _, edge := range edges {
-			n.Edges[edge.GetType()] =append(n.Edges[edge.GetType()], edge)
+	for _, edge := range edges {
+		n.Edges[edge.GetType()] = append(n.Edges[edge.GetType()], edge)
 	}
 }
 
@@ -120,4 +120,16 @@ func (n *SocialNode) SetPropMap(props map[string][]byte) {
 	n.Name = string(props["Name"])
 	n.Email = string(props["Email"])
 	n.Awesomeness, _ = strconv.Atoi(string(props["Awesomeness"]))
+}
+
+func (n *SocialNode) Equals(other Node) bool {
+	if a, ok := other.(*SocialNode); ok {
+		if n.GetID() == a.GetID() &&
+			n.GetName() == a.GetName() &&
+			n.GetEmail() == a.GetEmail() &&
+			n.GetAwesomeness() == a.GetAwesomeness() {
+			return true
+		}
+	}
+	return false
 }
