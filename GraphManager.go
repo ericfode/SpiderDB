@@ -27,8 +27,6 @@ type GraphManager struct {
 	nodes  map[string]Node
 	edges  map[string]Edge
 	client redis.Client
-	//	nodeConstructors []NodeConstructor
-	//	edgeConstructors []EdgeConstructor
 }
 
 func (gm *GraphManager) Initialize() {
@@ -37,17 +35,16 @@ func (gm *GraphManager) Initialize() {
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set(currIndex_s, []byte("0"))
 
-	//gm.Connect(port, ipAddr, dbNum)
+	gm.Connect(00, "0.0.0.0", 0)
 
 	gm.nodes = make(map[string]Node)
 	gm.edges = make(map[string]Edge)
 }
 
-/*
 func (gm *GraphManager) Connect(port int, ipAddr string, dbNum int) {
 	gm.client, _ = redis.NewSynchClient()
 }
-*/
+
 func (gm *GraphManager) GetNextIndex() string {
 	index, _ := gm.client.Get(currIndex_s)
 	gm.client.Incr(currIndex_s)
@@ -87,20 +84,25 @@ func (gm *GraphManager) DeleteNode(n Node) {
 	n = nil
 }
 
-func (gm *GraphManager) FindNode(nindex string) Node {
+func (gm *GraphManager) FindNode(nindex string, construct NodeConstructor) (Node, error) {
 	n, ok := gm.nodes[nindex]
 	//if local
 	if ok == true {
-		return n
+		return n, nil
 	}
 	//otherwise, get from db
-	return gm.GetNode(nindex)
+
+	return gm.GetNode(nindex, construct)
 }
 
 //bulk update - pushes everything to database
 func (gm *GraphManager) UpdateNode(n Node) error {
 
-	//e := gm.client.Hset(n.GetID(), props_s, n.GetPropMap())
+	for k, v := range n.GetPropMap() {
+		if e := gm.UpdateNodeProp(n, k, v); e == nil {
+			return e
+		}
+	}
 	return nil
 }
 
@@ -108,7 +110,7 @@ func (gm *GraphManager) UpdateNode(n Node) error {
 func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error {
 	id := n.GetID()
 	if id == "" {
-		//	return &NodeNotAddedToDBError{n}
+		return &dbError{"Not added to DB"}
 	}
 
 	nindex := node_s + id
@@ -117,18 +119,17 @@ func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error 
 	return nil
 }
 
-func (gm *GraphManager) GetNode(index string) Node {
+func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, error) {
 	nodeIdx, err := gm.client.Hget(node_s+index, props_s)
 
 	if err != nil || nodeIdx == nil {
-		return nil
+		return nil, &KeyNotFoundError{index}
 	}
-	/* Need to add constructor stuff
-	node.SetID(nodeIdx)
-	gm.nodes[nodeIdx] = node
-	return node
-	*/
-	return nil
+	// Need to add constructor stuff
+	node := construct(string(nodeIdx))
+	gm.nodes[string(nodeIdx)] = node
+	return node, nil
+
 }
 
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
