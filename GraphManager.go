@@ -72,7 +72,7 @@ func (gm *GraphManager) AddNode(n Node) {
 
 func (gm *GraphManager) DeleteNode(n Node) {
 	//Database
-	nindex := node_s+n.GetID()
+	nindex := node_s + n.GetID()
 	gm.client.Srem(nodes_s, []byte(nindex))
 	gm.client.Del(nindex)
 	//Local
@@ -114,13 +114,14 @@ func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error 
 	gm.client.Hset(nindex, prop, value)
 	return nil
 }
+
 //TODO : breakout node_s + index 
 //TODO : rename nodes_s to somthing less ambiguous
 
-func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (Node, bool){
-	node := construct(string(hash[1]),gm)
+func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (Node, bool) {
+	node := construct(string(hash[1]), gm)
 	propMap := make(map[string][]byte)
-	for i := 0; i < len(hash); i +=2{
+	for i := 0; i < len(hash); i += 2 {
 		propMap[string(hash[i])] = hash[i+1]
 	}
 	node.SetPropMap(propMap)
@@ -128,13 +129,13 @@ func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (
 }
 
 func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, error) {
-	if exists , err := gm.client.Sismember(nodes_s,[]byte(node_s + index)); exists != true{
+	if exists, err := gm.client.Sismember(nodes_s, []byte(node_s+index)); exists != true {
 		return nil, &KeyNotFoundError{index}
-	} else if err != nil{
+	} else if err != nil {
 		return nil, err
 	}
 
-	hash, err := gm.client.Hgetall(node_s+index)
+	hash, err := gm.client.Hgetall(node_s + index)
 	if err != nil {
 		return nil, err
 	} else if hash == nil {
@@ -240,8 +241,40 @@ func (gm *GraphManager) UpdateEdgeProp(e Edge, prop string, value []byte) error 
 	return nil
 }
 
-func (gm *GraphManager) GetEdge(id int) Edge {
-	return nil
+func (gm *GraphManager) EdgeFromHash(hash [][]byte, construct EdgeConstructor) (Edge, bool) {
+	edge := construct(string(hash[1]), gm)
+	propMap := make(map[string][]byte)
+	for i := 0; i < len(hash); i += 2 {
+		propMap[string(hash[i])] = hash[i+1]
+	}
+	edge.SetPropMap(propMap)
+	return edge, true
+}
+
+func (gm *GraphManager) GetEdge(id int, construct EdgeConstructor) (Edge, error) {
+	eindex := edge_s + string(id)
+	// check if edge is even in database
+	exists, err := gm.client.Sismember(edges_s, []byte(eindex))
+	if exists != true {
+		return nil, &KeyNotFoundError{string(id)}
+	} else if err != nil {
+		return nil, err
+	}
+
+	//retrieve edge's properties, if in db
+	hash, err := gm.client.Hgetall(eindex)
+	if err != nil {
+		return nil, err
+	}
+
+	edge, ok := gm.EdgeFromHash(hash, construct)
+	if !ok {
+		return nil, err
+	}
+
+	// save edge locally 
+	gm.edges[string(edge.GetID())] = edge
+	return edge, nil
 }
 
 func (gm *GraphManager) GetNodeEdges(n Node) map[string][]Edge {

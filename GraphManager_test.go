@@ -148,6 +148,39 @@ func TestGetNode(t *testing.T) {
 
 }
 
+func TestEdgeConstructor(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	e := SocialEdgeConst("94", gm)
+	if e == nil {
+		t.Error("Edge is nil")
+	}
+}
+
+func TestGetEdge(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	edges := initTestEdges(gm)
+	e := edges[0]
+	gm.AddEdge(e)
+	id := e.GetID()
+
+	idInt := BytesToInt([]byte(id))
+	t.Errorf(" Byte to Int yielded %d", idInt)
+	edge, err := gm.GetEdge(idInt, SocialEdgeConst)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+	if edge == nil {
+		t.Error("GM did not retrieve edge (nil)")
+	}
+}
+
 func TestAddSingleEdge(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()

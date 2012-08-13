@@ -17,4 +17,4 @@ type Edge interface {
 	SetSecondNode(node Node)
 }
 
-type EdgeConstructor func(id string) Edge
+type EdgeConstructor func(id string, gm GraphBackend) Edge
