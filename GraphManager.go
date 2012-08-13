@@ -257,8 +257,8 @@ func (gm *GraphManager) EdgeFromHash(hash [][]byte, construct EdgeConstructor) (
 	return edge, true
 }
 
-func (gm *GraphManager) GetEdge(id int, construct EdgeConstructor) (Edge, error) {
-	eindex := edge_s + string(id)
+func (gm *GraphManager) GetEdge(id string, construct EdgeConstructor) (Edge, error) {
+	eindex := edge_s + id
 	// check if edge is even in database
 	exists, err := gm.client.Sismember(edges_s, []byte(eindex))
 	if exists != true {

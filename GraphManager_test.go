@@ -172,9 +172,7 @@ func TestGetEdge(t *testing.T) {
 	gm.AddEdge(e)
 	id := e.GetID()
 
-	idInt := BytesToInt([]byte(id))
-	t.Errorf(" Byte to Int yielded %d", idInt)
-	edge, err := gm.GetEdge(idInt, SocialEdgeConst)
+	edge, err := gm.GetEdge(id, SocialEdgeConst)
 
 	if err != nil {
 		t.Error(err.Error())
