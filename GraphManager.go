@@ -34,7 +34,7 @@ func (gm *GraphManager) Initialize() {
 	gm.client, _ = redis.NewSynchClient()
 	gm.client.Set(currIndex_s, []byte("0"))
 
-	gm.Connect(00, "0.0.0.0", 0)
+	gm.Connect(6379, "127.0.0.1", 13)
 
 	gm.nodes = make(map[string]Node)
 	gm.edges = make(map[string]Edge)
@@ -69,13 +69,13 @@ func (gm *GraphManager) AddNode(n Node) {
 	gm.client.Sadd(nodes_s, []byte(nindex))
 
 	//Local
-	n.SetID(nindex)
+	n.SetID(index)
 	gm.nodes[nindex] = n
 }
 
 func (gm *GraphManager) DeleteNode(n Node) {
 	//Database
-	nindex := n.GetID()
+	nindex := node_s+n.GetID()
 	gm.client.Srem(nodes_s, []byte(nindex))
 	gm.client.Del(nindex)
 	//Local
@@ -117,16 +117,39 @@ func (gm *GraphManager) UpdateNodeProp(n Node, prop string, value []byte) error 
 	gm.client.Hset(nindex, prop, value)
 	return nil
 }
+//TODO : breakout node_s + index 
+//TODO : rename nodes_s to somthing less ambiguous
+
+func (gm *GraphManager) NodeFromHash(hash [][]byte, construct NodeConstructor) (Node, bool){
+	node := construct(string(hash[1]),gm)
+	propMap := make(map[string][]byte)
+	for i := 0; i < len(hash); i +=2{
+		propMap[string(hash[i])] = hash[i+1]
+	}
+	node.SetPropMap(propMap)
+	return node, true
+}
 
 func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, error) {
-	nodeIdx, err := gm.client.Hget(node_s+index, props_s)
+	if exists , err := gm.client.Sismember(nodes_s,[]byte(node_s + index)); exists != true{
+		return nil, &KeyNotFoundError{index}
+	} else if err != nil{
+		return nil, err
+	}
 
-	if err != nil || nodeIdx == nil {
+	hash, err := gm.client.Hgetall(node_s+index)
+	if err != nil {
+		return nil, err
+	} else if hash == nil {
 		return nil, &KeyNotFoundError{index}
 	}
+
 	// Need to add constructor stuff
-	node := construct(string(nodeIdx))
-	gm.nodes[string(nodeIdx)] = node
+	node, ok := gm.NodeFromHash(hash, construct)
+	if !ok {
+		return nil, &dbError{"Something that should not be able to brake broke???"}
+	}
+	gm.nodes[node_s+node.GetID()] = node
 	return node, nil
 
 }

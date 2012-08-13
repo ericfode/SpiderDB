@@ -14,4 +14,4 @@ type Node interface {
 	SetGM(gm GraphBackend)
 }
 
-type NodeConstructor func(id string) Node
+type NodeConstructor func(id string, gm GraphBackend) Node
