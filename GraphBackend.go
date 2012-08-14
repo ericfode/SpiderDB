@@ -10,7 +10,7 @@ type GraphBackend interface {
 	UpdateNodeProp(n Node, prop string, value []byte) error
 	GetNode(string, NodeConstructor) (Node, error)
 	Attach(node1 Node, node2 Node, edge Edge)
-	GetNeighbors(node Node) []Connection
+	GetOutgoingNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) []Connection
 	AddEdge(e Edge)
 	DeleteEdge(e Edge)
 	FindEdge(id string, construct EdgeConstructor) (Edge, error)
@@ -19,7 +19,7 @@ type GraphBackend interface {
 	GetEdge(id string, construct EdgeConstructor) (Edge, error)
 	GetOutgoingNodeEdges(n Node, construct EdgeConstructor) []Edge
 	GetIncomingNodeEdges(n Node, construct EdgeConstructor) []Edge
-	GetAllNodeEdges(n Node, construct EdgeConstructor) []Edge 
+	GetAllNodeEdges(n Node, construct EdgeConstructor) []Edge
 	NodeFromHash([][]byte, NodeConstructor) (Node, bool)
 	EdgeFromHash([][]byte, EdgeConstructor) (Edge, bool)
 

@@ -13,8 +13,10 @@ type Edge interface {
 
 	GetFirstNode() Node
 	GetSecondNode() Node
+
 	SetFirstNode(node Node)
 	SetSecondNode(node Node)
+
 }
 
 type EdgeConstructor func(id string, gm GraphBackend) Edge
