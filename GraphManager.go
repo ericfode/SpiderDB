@@ -239,18 +239,25 @@ func (gm *GraphManager) FindEdge(id string, construct EdgeConstructor) (Edge, er
 	return edge, err
 }
 
-func (gm *GraphManager) UpdateEdge(e Edge) bool {
-	return true
+// pushes changes of e(local edge) to db
+func (gm *GraphManager) UpdateEdge(e Edge) error {
+
+	for k, v := range e.GetPropMap() {
+		if err := gm.UpdateEdgeProp(e, k, v); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (gm *GraphManager) UpdateEdgeProp(e Edge, prop string, value []byte) error {
 	if e.GetID() == "" {
-		//		return &EdgeNotAddedToDBError{e}
+		return &dbError{"Not added to DB"}
 	}
 
-	nindex := edge_s + e.GetID()
+	eindex := edge_s + e.GetID()
 
-	gm.client.Hset(nindex, prop, value)
+	gm.client.Hset(eindex, prop, value)
 	return nil
 }
 
