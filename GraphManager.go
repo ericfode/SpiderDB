@@ -6,7 +6,7 @@ package spiderDB
 //  + make sorted set of all nodes with type id as score
 //  + when inserting node, add to sorted set 
 
-import "Go-Redis"
+import "github.com/alphazero/Go-Redis"
 import "strings"
 
 // consts (typo prevention)
