@@ -65,6 +65,16 @@ func (s *SocialEdge) GetFirstNode() Node {
 func (s *SocialEdge) GetSecondNode() Node {
 	return s.sndNode
 }
+func (s *SocialEdge) GetOtherNode(node Node) Node {
+	if s.fstNode.GetID() == node.GetID() {
+		return s.sndNode
+	}
+	if s.sndNode.GetID() == node.GetID() {
+		return s.fstNode
+	}
+	return nil
+	//TODO : Make appropriately descriptive error
+}
 func (s *SocialEdge) SetFirstNode(node Node) {
 	s.fstNode = node
 }

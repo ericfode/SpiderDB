@@ -6,7 +6,7 @@ package spiderDB
 //  + make sorted set of all nodes with type id as score
 //  + when inserting node, add to sorted set 
 
-import "github.com/alphazero/Go-Redis"
+import "Go-Redis"
 import "strings"
 
 // consts (typo prevention)
@@ -172,13 +172,19 @@ func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 
 }
 
-func (gm *GraphManager) GetNeighbors(node Node) []Connection {
-	//	conns, _ := gm.client.Hgetall(node_s + node.GetID())
+func (gm *GraphManager) GetOutgoingNeighbors(node Node) []Connection {
 
-	//	for _, _ := range conns {
+	//adjArray is []byte of n,e,n,e etc
+	adjId := node_s + node.GetID() + adj_s
+	adjArray := gm.client.Hgetall(adjId)
+	neighbors := make([]Connection, len(adjArray))
 
-	//	}
-	return nil
+	for i := 0; i < len(adjArray); i += 2 {
+		newConn := new(Connection)
+
+		neighbors = append(neighbors, newConnection)
+	}
+
 }
 
 //EDGE MANAGEMENT
