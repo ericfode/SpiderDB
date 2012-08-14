@@ -21,6 +21,7 @@ func initTestEdges(gm GraphBackend) []*SocialEdge {
 
 func initTestNodes(gm GraphBackend) []*SocialNode {
 	var testNodes = []*SocialNode{
+		&SocialNode{Name: "Joe", Email: "joe@joe.com", Awesomeness: 120, GM: gm},
 		&SocialNode{Name: "Bill", Email: "bill@billisAwsome.com", Awesomeness: 40, GM: gm},
 		&SocialNode{Name: "Jane", Email: "jane@think.com", Awesomeness: 40, GM: gm},
 		&SocialNode{Name: "Sue", Email: "Sue@isueyou.com", Awesomeness: 3240, GM: gm},
@@ -106,7 +107,11 @@ func TestDeleteNode(t *testing.T) {
 	gm.DeleteNode(n)
 
 	if nDb, err := gm.GetNode(index, SocialNodeConst); (err != nil) && (nDb == nil) {
-		t.Log(err.Error())
+		if _, ok := err.(*KeyNotFoundError); ok {
+			return
+		} else {
+			t.Error("GM failed to delete node and err properly")
+		}
 	} else if nDb != nil {
 		t.Errorf("found node id: %+v", nDb)
 		t.Error("GraphManager did not delete node")
@@ -257,6 +262,7 @@ func TestGetAllNodesGroup(t *testing.T) {
 	gm = new(GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
+
 	nodes := initTestNodes(gm)
 	for _, val := range nodes {
 		gm.AddNode(val)
@@ -277,5 +283,37 @@ func TestGetAllNodesGroup(t *testing.T) {
 					Index : %d`, nodes[StringToInt(val.GetID())], val, i)
 			return
 		}
+	}
+}
+
+func initTestNodeByteAA() [][]byte {
+	return [][]byte{[]byte("Name"), []byte("Joe"), []byte("Email"),
+		[]byte("joe@joe.com"), []byte("Awesomeness"), []byte("120")}
+}
+
+func TestNodeFromHash(t *testing.T) {
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	nodes := initTestNodes(gm)
+	gm.AddNode(nodes[0])
+
+	nodeFromDB, errDB := gm.FindNode(node_s+"0", SocialNodeConst)
+	nodeFromHash, ok := gm.NodeFromHash(initTestNodeByteAA(), SocialNodeConst)
+
+	nodeFromHash.SetID("0")
+
+	if errDB != nil {
+		t.Error(errDB)
+	}
+
+	if !ok {
+		t.Error("Node From Hash failed")
+	}
+
+	//compare nodes
+	if !nodeFromDB.Equals(nodeFromHash) {
+		t.Errorf("Node From Hash incorrect: \ndb: %v \nhs: %v", nodeFromDB, nodeFromHash)
 	}
 }

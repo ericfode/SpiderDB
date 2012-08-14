@@ -159,16 +159,7 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
 
-//Add neigbhbor both locally and in db
-
-//attach bidirectional Neighbor
-//think about using this same pattern (passing a type) for other funcs 
 func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
-	//decide if being able to add nodes and edges that don't have ids
-	//into the data base is a good idea or if making the user explicitly
-	//do it is a good idea
-	//i think that having different behavior then just attaching a neightbor
-	//is a bad idea
 	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
 	if !e.IsDirected() {
 		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
@@ -252,7 +243,7 @@ func (gm *GraphManager) UpdateEdge(e Edge) error {
 
 func (gm *GraphManager) UpdateEdgeProp(e Edge, prop string, value []byte) error {
 	if e.GetID() == "" {
-		return &dbError{"Not added to DB"}
+		return &dbError{"Edge not added to DB"}
 	}
 
 	eindex := edge_s + e.GetID()
