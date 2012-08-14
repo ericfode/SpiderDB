@@ -8,6 +8,7 @@ package spiderDB
 
 import "github.com/alphazero/Go-Redis"
 import "strings"
+
 // consts (typo prevention)
 const currIndex_s = "currIndex"
 const node_s = "node:"
@@ -156,8 +157,6 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 }
 
-
-
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
 
 //Add neigbhbor both locally and in db
@@ -228,8 +227,16 @@ func (gm *GraphManager) DeleteEdge(e Edge) {
 	e = nil
 }
 
-func (gm *GraphManager) FindEdge(id int) Edge {
-	return nil
+func (gm *GraphManager) FindEdge(id string, construct EdgeConstructor) (Edge, error) {
+	eindex := edge_s + id
+	//if locally available
+	if e, ok := gm.edges[eindex]; ok == true {
+		return e, nil
+	}
+
+	//else extract from db (GetEdge saves local copy)
+	edge, err := gm.GetEdge(eindex, construct)
+	return edge, err
 }
 
 func (gm *GraphManager) UpdateEdge(e Edge) bool {
@@ -319,10 +326,9 @@ func (gm *GraphManager) GetAllNodes(construct NodeConstructor) ([]Node, error) {
 	for i, v := range nodeIDs {
 		idx := strings.LastIndex(string(v), ":")
 		nodes[i], err = gm.GetNode(string(v)[idx+1:], construct)
-		if err != nil{
+		if err != nil {
 			return nil, err
 		}
 	}
-	return nodes,nil
+	return nodes, nil
 }
-

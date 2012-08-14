@@ -13,7 +13,7 @@ type GraphBackend interface {
 	GetNeighbors(node Node) []Connection
 	AddEdge(e Edge)
 	DeleteEdge(e Edge)
-	FindEdge(id int) Edge
+	FindEdge(id string, construct EdgeConstructor) (Edge, error)
 	UpdateEdge(e Edge) bool
 	UpdateEdgeProp(e Edge, prop string, value []byte) error
 	GetEdge(id string, construct EdgeConstructor) (Edge, error)
