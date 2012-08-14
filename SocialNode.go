@@ -85,8 +85,9 @@ func (n *SocialNode) SetAwesomeness(awe int) {
 }
 
 //DB only function
-func (n *SocialNode) SetEdges(edges map[string][]Edge) {
-	n.Edges = edges
+func (n *SocialNode) SetEdges(edges []Edge) {
+	n.Edges = make(map[string][]Edge)
+	n.AddEdges(edges)
 }
 
 //DB only function

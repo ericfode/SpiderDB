@@ -317,3 +317,22 @@ func TestNodeFromHash(t *testing.T) {
 		t.Errorf("Node From Hash incorrect: \ndb: %v \nhs: %v", nodeFromDB, nodeFromHash)
 	}
 }
+
+func TestGetNodeEdges(t *testing.T){
+	gm = new(GraphManager)
+	gm.Initialize()
+	defer gm.ClearAll()
+	
+	nodes := initTestNodes(gm)
+	edges := initTestEdges(gm)
+
+	for _,v := range nodes{
+		gm.AddNode(v)
+	}
+	for _,v := range edges{
+		gm.AddEdge(v)
+	}
+
+
+}
+

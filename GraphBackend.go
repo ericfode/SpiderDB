@@ -17,7 +17,9 @@ type GraphBackend interface {
 	UpdateEdge(e Edge) error
 	UpdateEdgeProp(e Edge, prop string, value []byte) error
 	GetEdge(id string, construct EdgeConstructor) (Edge, error)
-	GetNodeEdges(n Node) map[string][]Edge
+	GetOutgoingNodeEdges(n Node, construct EdgeConstructor) []Edge
+	GetIncomingNodeEdges(n Node, construct EdgeConstructor) []Edge
+	GetAllNodeEdges(n Node, construct EdgeConstructor) []Edge 
 	NodeFromHash([][]byte, NodeConstructor) (Node, bool)
 	EdgeFromHash([][]byte, EdgeConstructor) (Edge, bool)
 

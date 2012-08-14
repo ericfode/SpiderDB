@@ -17,6 +17,7 @@ const nodes_s = "nodes"
 const edges_s = "edges"
 const props_s = "props"
 const adj_s = "adj"
+const inadj_s = "inadj"
 
 //Initializes database at startup
 
@@ -288,18 +289,42 @@ func (gm *GraphManager) GetEdge(id string, construct EdgeConstructor) (Edge, err
 	return edge, nil
 }
 
-func (gm *GraphManager) GetNodeEdges(n Node) map[string][]Edge {
+func (gm *GraphManager) GetNodeEdges(n Node, construct EdgeConstructor, adjId string) []Edge {
+	hash, err := gm.client.Hgetall(adjId)
 
-	//	ret := make(map[string][]Edge, len(gm.edges))
-	//for each edge, classify and add edge pointer to correct slice
-	/*
-		for i := 0; i < len(gm.edges); i++ {
-			typ := gm.edges[i].GetType()
-			ret[typ] = append(ret[typ], gm.edges[i])
-		}
-		return ret
-	*/
-	return nil
+	edges := make([]Edge, len(hash)/2)
+
+	if err != nil {
+		return nil
+	}
+
+	for i := 0; i < len(hash); i += 2 {
+		eindex := edge_s + string(hash[i+1])
+		e, _ := gm.GetEdge(eindex, construct)
+		edges[i/2] = e
+	}
+
+	return edges
+}
+
+func (gm *GraphManager) GetOutgoingNodeEdges(n Node, construct EdgeConstructor) []Edge {
+	adjId := node_s + n.GetID() + adj_s
+	return gm.GetNodeEdges(n, construct, adjId)
+}
+
+func (gm *GraphManager) GetIncomingNodeEdges(n Node, construct EdgeConstructor) []Edge {
+	inadjId := node_s + n.GetID() + inadj_s
+	return gm.GetNodeEdges(n, construct, inadjId)
+}
+
+func (gm *GraphManager) GetAllNodeEdges(n Node, construct EdgeConstructor) []Edge {
+	adjId := node_s + n.GetID() + adj_s
+	inadjId := node_s + n.GetID() + inadj_s
+	edgesOut := gm.GetNodeEdges(n, construct, adjId)
+	edgesIn := gm.GetNodeEdges(n, construct, inadjId)
+
+	allEdges := append(edgesIn, edgesOut...)
+	return allEdges
 }
 
 func (gm *GraphManager) ClearAll() {

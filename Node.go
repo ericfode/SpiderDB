@@ -4,7 +4,7 @@ type Node interface {
 	GetID() string //DB
 	SetID(id string)
 
-	SetEdges(edges map[string][]Edge)
+	SetEdges(edges []Edge)
 	AddEdges(edge []Edge)
 	RemoveEdge(string []Edge)
 
