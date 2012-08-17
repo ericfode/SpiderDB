@@ -1,24 +1,33 @@
-package spiderDB
+package socialGraph
 
 import "strconv"
+import "github.com/HackerSchool12/SpiderDB"
 
 type SocialEdge struct {
 	id      int
 	weight  int
 	typ     string
-	GM      GraphBackend
-	fstNode Node
-	sndNode Node
+	GM      spiderDB.GraphBackend
+	fstNode spiderDB.Node
+	sndNode spiderDB.Node
 }
 
-func SocialEdgeConst(id string, GM GraphBackend) Edge {
+func NewSocialEdge(weight int, typ string, gm spiderDB.GraphBackend) *SocialEdge {
+	edge := new(SocialEdge)
+	edge.SetGM(gm)
+	edge.SetType(typ)
+	edge.SetWeight(weight)
+	return edge
+}
+
+func SocialEdgeConst(id string, GM spiderDB.GraphBackend) spiderDB.Edge {
 	edge := new(SocialEdge)
 	edge.SetGM(GM)
 	edge.SetID(id)
 	return edge
 }
 
-func (e *SocialEdge) SetGM(gm GraphBackend) {
+func (e *SocialEdge) SetGM(gm spiderDB.GraphBackend) {
 	e.GM = gm
 }
 
@@ -35,8 +44,8 @@ func (s *SocialEdge) GetWeight() int {
 	return s.weight
 }
 
-func (s *SocialEdge) SetWeight(weight string) {
-	s.weight, _ = strconv.Atoi(weight)
+func (s *SocialEdge) SetWeight(weight int) {
+	s.weight = weight
 }
 func (s *SocialEdge) GetType() string {
 	return s.typ
@@ -46,26 +55,26 @@ func (s *SocialEdge) SetType(typestr string) {
 }
 
 func (s *SocialEdge) SetPropMap(props map[string][]byte) {
-	s.id = BytesToInt(props["Id"])
-	s.weight = BytesToInt(props["Weight"])
+	s.id = spiderDB.BytesToInt(props["Id"])
+	s.weight = spiderDB.BytesToInt(props["Weight"])
 	s.typ = string(props["Type"])
 }
 
 func (s *SocialEdge) GetPropMap() map[string][]byte {
 	var propMap = map[string][]byte{
-		"Id":     IntToBytes(s.id),
-		"Weight": IntToBytes(s.weight),
+		"Id":     spiderDB.IntToBytes(s.id),
+		"Weight": spiderDB.IntToBytes(s.weight),
 		"Type":   []byte(s.typ)}
 	return propMap
 }
 
-func (s *SocialEdge) GetFirstNode() Node {
+func (s *SocialEdge) GetFirstNode() spiderDB.Node {
 	return s.fstNode
 }
-func (s *SocialEdge) GetSecondNode() Node {
+func (s *SocialEdge) GetSecondNode() spiderDB.Node {
 	return s.sndNode
 }
-func (s *SocialEdge) GetOtherNode(node Node) Node {
+func (s *SocialEdge) GetOtherNode(node spiderDB.Node) spiderDB.Node {
 	if s.fstNode.GetID() == node.GetID() {
 		return s.sndNode
 	}
@@ -75,10 +84,10 @@ func (s *SocialEdge) GetOtherNode(node Node) Node {
 	return nil
 	//TODO : Make appropriately descriptive error
 }
-func (s *SocialEdge) SetFirstNode(node Node) {
+func (s *SocialEdge) SetFirstNode(node spiderDB.Node) {
 	s.fstNode = node
 }
-func (s *SocialEdge) SetSecondNode(node Node) {
+func (s *SocialEdge) SetSecondNode(node spiderDB.Node) {
 	s.sndNode = node
 }
 

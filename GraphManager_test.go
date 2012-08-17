@@ -1,44 +1,46 @@
-package spiderDB
+package spiderDB_test
 
 import "testing"
+import "github.com/HackerSchool12/SpiderDB"
+import "github.com/HackerSchool12/SpiderDB/socialGraph"
 
-//TODO: update tests to use Node.Equals instead of just compairing id
-var gm *GraphManager
+//TODO: update tests to use SpiderDB.Node.Equals instead of just compairing id
+var gm *spiderDB.GraphManager
 
-func initTestEdges(gm GraphBackend) []*SocialEdge {
-	var testEdges = []*SocialEdge{
-		&SocialEdge{weight: 43, typ: "knows", GM: gm},
-		&SocialEdge{weight: 110, typ: "likes", GM: gm},
-		&SocialEdge{weight: 79, typ: "hates", GM: gm},
-		&SocialEdge{weight: 2, typ: "stalks", GM: gm},
-		&SocialEdge{weight: 53, typ: "knows", GM: gm},
-		&SocialEdge{weight: 89, typ: "likes", GM: gm},
-		&SocialEdge{weight: 12, typ: "hates", GM: gm},
-		&SocialEdge{weight: 99, typ: "stalks", GM: gm},
+func initTestEdges(gm spiderDB.GraphBackend) []*socialGraph.SocialEdge {
+	var testEdges = []*socialGraph.SocialEdge{
+		socialGraph.NewSocialEdge(43, "knows", gm),
+		socialGraph.NewSocialEdge(110, "likes", gm),
+		socialGraph.NewSocialEdge(79, "hates", gm),
+		socialGraph.NewSocialEdge(2, "stalks", gm),
+		socialGraph.NewSocialEdge(53, "knows", gm),
+		socialGraph.NewSocialEdge(89, "likes", gm),
+		socialGraph.NewSocialEdge(12, "hates", gm),
+		socialGraph.NewSocialEdge(99, "stalks", gm),
 	}
 	return testEdges
 }
 
-func initTestNodes(gm GraphBackend) []*SocialNode {
-	var testNodes = []*SocialNode{
-		&SocialNode{Name: "Joe", Email: "joe@joe.com", Awesomeness: 120, GM: gm},
-		&SocialNode{Name: "Bill", Email: "bill@billisAwsome.com", Awesomeness: 40, GM: gm},
-		&SocialNode{Name: "Jane", Email: "jane@think.com", Awesomeness: 40, GM: gm},
-		&SocialNode{Name: "Sue", Email: "Sue@isueyou.com", Awesomeness: 3240, GM: gm},
-		&SocialNode{Name: "Sally", Email: "smadfs@gmail.com", Awesomeness: 30, GM: gm},
-		&SocialNode{Name: "Tom", Email: "rawr@hackerschool.com", Awesomeness: 5120, GM: gm},
-		&SocialNode{Name: "Domnick", Email: "affiliate@iscamyou.com", Awesomeness: 52, GM: gm},
-		&SocialNode{Name: "Eric", Email: "eric@gmail.com", Awesomeness: 52340, GM: gm},
-		&SocialNode{Name: "Sarah", Email: "sarah@yahoo.com", Awesomeness: 5546, GM: gm},
-		&SocialNode{Name: "Nathan", Email: "shortemail@ineedemail.com", Awesomeness: 43, GM: gm},
-		&SocialNode{Name: "That Guy", Email: "anothertroll@myemailwastaken.com", Awesomeness: 51, GM: gm},
-		&SocialNode{Name: "That Girl", Email: "troll@girls.com", Awesomeness: 51, GM: gm},
-		&SocialNode{Name: "Ugg", Email: "mrr@complain.com", Awesomeness: 5234, GM: gm},
+func initTestNodes(gm spiderDB.GraphBackend) []*socialGraph.SocialNode {
+	var testNodes = []*socialGraph.SocialNode{
+		socialGraph.NewSocialNode("Joe", "joe@joe.com", 120, gm),
+		socialGraph.NewSocialNode("Bill", "bill@billisAwsome.com", 40, gm),
+		socialGraph.NewSocialNode("Jane", "jane@think.com", 40, gm),
+		socialGraph.NewSocialNode("Sue", "Sue@isueyou.com", 3240, gm),
+		socialGraph.NewSocialNode("Sally", "smadfs@gmail.com", 30, gm),
+		socialGraph.NewSocialNode("Tom", "rawr@hackerschool.com", 5120, gm),
+		socialGraph.NewSocialNode("Domnick", "affiliate@iscamyou.com", 52, gm),
+		socialGraph.NewSocialNode("Eric", "eric@gmail.com", 52340, gm),
+		socialGraph.NewSocialNode("Sarah", "sarah@yahoo.com", 5546, gm),
+		socialGraph.NewSocialNode("Nathan", "shortemail@ineedemail.com", 43, gm),
+		socialGraph.NewSocialNode("That Guy", "anothertroll@myemailwastaken.com", 51, gm),
+		socialGraph.NewSocialNode("That Girl", "troll@girls.com", 51, gm),
+		socialGraph.NewSocialNode("Ugg", "mrr@complain.com", 5234, gm),
 	}
 	return testNodes
 }
 func TestAddSingleNode(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
@@ -55,7 +57,7 @@ func TestAddSingleNode(t *testing.T) {
 
 func TestAddNodes(t *testing.T) {
 
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 	n := initTestNodes(gm)
@@ -87,16 +89,16 @@ func TestAddNodes(t *testing.T) {
 }
 
 func TestClear(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	gm.ClearAll()
-	if gm.nodes != nil || gm.edges != nil || gm.client != nil {
-		t.Error("GraphManager did not ClearAll")
-	}
+	//if gm.nodes != nil || gm.edges != nil || gm.client != nil {
+	//	t.Error("GraphManager did not ClearAll")
+	//}
 }
 
 func TestDeleteNode(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
@@ -106,8 +108,8 @@ func TestDeleteNode(t *testing.T) {
 
 	gm.DeleteNode(n)
 
-	if nDb, err := gm.GetNode(index, SocialNodeConst); (err != nil) && (nDb == nil) {
-		if _, ok := err.(*KeyNotFoundError); ok {
+	if nDb, err := gm.GetNode(index, socialGraph.SocialNodeConst); (err != nil) && (nDb == nil) {
+		if _, ok := err.(*spiderDB.KeyNotFoundError); ok {
 			return
 		} else {
 			t.Error("GM failed to delete node and err properly")
@@ -121,24 +123,24 @@ func TestDeleteNode(t *testing.T) {
 }
 
 func TestNodeConstructor(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
-	node := SocialNodeConst("42", gm)
+	node := socialGraph.SocialNodeConst("42", gm)
 	if node == nil {
 		t.Error("Node is nil")
 	}
 }
 
 func TestGetNode(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
 	n := nodes[0]
 	gm.AddNode(n)
 	index := n.GetID()
-	nDb, err := gm.GetNode(index, SocialNodeConst)
+	nDb, err := gm.GetNode(index, socialGraph.SocialNodeConst)
 	if err != nil {
 		t.Error(err.Error())
 		return
@@ -157,18 +159,18 @@ func TestGetNode(t *testing.T) {
 }
 
 func TestEdgeConstructor(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
-	e := SocialEdgeConst("94", gm)
+	e := socialGraph.SocialEdgeConst("94", gm)
 	if e == nil {
 		t.Error("Edge is nil")
 	}
 }
 
 func TestGetEdge(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
@@ -177,7 +179,7 @@ func TestGetEdge(t *testing.T) {
 	gm.AddEdge(e)
 	id := e.GetID()
 
-	edge, err := gm.GetEdge(id, SocialEdgeConst)
+	edge, err := gm.GetEdge(id, socialGraph.SocialEdgeConst)
 
 	if err != nil {
 		t.Error(err.Error())
@@ -188,7 +190,7 @@ func TestGetEdge(t *testing.T) {
 }
 
 func TestAddSingleEdge(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
@@ -203,7 +205,7 @@ func TestAddSingleEdge(t *testing.T) {
 }
 
 func TestAddEdges(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
@@ -234,12 +236,12 @@ func TestAddEdges(t *testing.T) {
 }
 
 func TestGetAllNodesSingle(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 	nodes := initTestNodes(gm)
 	gm.AddNode(nodes[0])
-	allNodes, err := gm.GetAllNodes(SocialNodeConst)
+	allNodes, err := gm.GetAllNodes(socialGraph.SocialNodeConst)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -259,7 +261,7 @@ func TestGetAllNodesSingle(t *testing.T) {
 }
 
 func TestGetAllNodesGroup(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
@@ -267,7 +269,7 @@ func TestGetAllNodesGroup(t *testing.T) {
 	for _, val := range nodes {
 		gm.AddNode(val)
 	}
-	allNodes, err := gm.GetAllNodes(SocialNodeConst)
+	allNodes, err := gm.GetAllNodes(socialGraph.SocialNodeConst)
 	if err != nil {
 		t.Error(err.Error())
 	}
@@ -276,11 +278,11 @@ func TestGetAllNodesGroup(t *testing.T) {
 		return
 	}
 	for i, val := range allNodes {
-		if !val.Equals(nodes[StringToInt(val.GetID())]) {
+		if !val.Equals(nodes[spiderDB.StringToInt(val.GetID())]) {
 			t.Errorf(`Saved node and node from GetAllNodes not Equals.../n
 					Expected : %v /n
 					Actual : %v /n
-					Index : %d`, nodes[StringToInt(val.GetID())], val, i)
+					Index : %d`, nodes[spiderDB.StringToInt(val.GetID())], val, i)
 			return
 		}
 	}
@@ -292,15 +294,15 @@ func initTestNodeByteAA() [][]byte {
 }
 
 func TestNodeFromHash(t *testing.T) {
-	gm = new(GraphManager)
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
 
 	nodes := initTestNodes(gm)
 	gm.AddNode(nodes[0])
 
-	nodeFromDB, errDB := gm.FindNode(node_s+"0", SocialNodeConst)
-	nodeFromHash, ok := gm.NodeFromHash(initTestNodeByteAA(), SocialNodeConst)
+	nodeFromDB, errDB := gm.FindNode("node:0", socialGraph.SocialNodeConst)
+	nodeFromHash, ok := gm.NodeFromHash(initTestNodeByteAA(), socialGraph.SocialNodeConst)
 
 	nodeFromHash.SetID("0")
 
@@ -318,21 +320,19 @@ func TestNodeFromHash(t *testing.T) {
 	}
 }
 
-func TestGetNodeEdges(t *testing.T){
-	gm = new(GraphManager)
+func TestGetNodeEdges(t *testing.T) {
+	gm = new(spiderDB.GraphManager)
 	gm.Initialize()
 	defer gm.ClearAll()
-	
+
 	nodes := initTestNodes(gm)
 	edges := initTestEdges(gm)
 
-	for _,v := range nodes{
+	for _, v := range nodes {
 		gm.AddNode(v)
 	}
-	for _,v := range edges{
+	for _, v := range edges {
 		gm.AddEdge(v)
 	}
 
-
 }
-

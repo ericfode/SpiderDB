@@ -1,6 +1,7 @@
-package spiderDB
+package socialGraph
 
 import "strconv"
+import "github.com/HackerSchool12/SpiderDB"
 
 //TODO: rename struct vars to lowercase
 //TODO: add commit function
@@ -9,11 +10,11 @@ type SocialNode struct {
 	Name        string
 	Email       string
 	Awesomeness int
-	Edges       map[string][]Edge
-	GM          GraphBackend
+	Edges       map[string][]spiderDB.Edge
+	GM          spiderDB.GraphBackend
 }
 
-func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialNode {
+func NewSocialNode(name string, email string, awe int, gm spiderDB.GraphBackend) *SocialNode {
 	sn := new(SocialNode)
 	sn.GM = gm
 	sn.Awesomeness = awe
@@ -22,18 +23,18 @@ func NewSocialNode(name string, email string, awe int, gm GraphBackend) *SocialN
 	return sn
 }
 
-func SocialNodeConst(id string, GM GraphBackend) Node {
+func SocialNodeConst(id string, GM spiderDB.GraphBackend) spiderDB.Node {
 	sn := new(SocialNode)
 	sn.SetGM(GM)
 	sn.SetID(id)
 	return sn
 }
 
-func (n *SocialNode) SetGM(gm GraphBackend) {
+func (n *SocialNode) SetGM(gm spiderDB.GraphBackend) {
 	n.GM = gm
 }
 
-// has this node been added to the gm?
+// has this spiderDB.Node been added to the gm?
 func (n *SocialNode) IsReged() bool {
 	return true
 }
@@ -85,19 +86,19 @@ func (n *SocialNode) SetAwesomeness(awe int) {
 }
 
 //DB only function
-func (n *SocialNode) SetEdges(edges []Edge) {
-	n.Edges = make(map[string][]Edge)
+func (n *SocialNode) SetEdges(edges []spiderDB.Edge) {
+	n.Edges = make(map[string][]spiderDB.Edge)
 	n.AddEdges(edges)
 }
 
 //DB only function
-func (n *SocialNode) AddEdges(edges []Edge) {
+func (n *SocialNode) AddEdges(edges []spiderDB.Edge) {
 	for _, edge := range edges {
 		n.Edges[edge.GetType()] = append(n.Edges[edge.GetType()], edge)
 	}
 }
 
-func (n *SocialNode) RemoveEdge(edges []Edge) {
+func (n *SocialNode) RemoveEdge(edges []spiderDB.Edge) {
 	for _, findedge := range edges {
 		for index, edge := range n.Edges[findedge.GetType()] {
 			if edge.GetID() == findedge.GetID() {
@@ -123,7 +124,7 @@ func (n *SocialNode) SetPropMap(props map[string][]byte) {
 	n.Awesomeness, _ = strconv.Atoi(string(props["Awesomeness"]))
 }
 
-func (n *SocialNode) Equals(other Node) bool {
+func (n *SocialNode) Equals(other spiderDB.Node) bool {
 	if a, ok := other.(*SocialNode); ok {
 		if n.GetID() == a.GetID() &&
 			n.GetName() == a.GetName() &&
