@@ -5,8 +5,8 @@ type Node interface {
 	SetID(id string)
 
 	SetEdges(edges []Edge)
-	AddEdges(edge []Edge)
-	RemoveEdge(string []Edge)
+	AddEdges(edges []Edge)
+	RemoveEdges(edges []Edge)
 
 	GetPropMap() map[string][]byte
 	SetPropMap(props map[string][]byte)
