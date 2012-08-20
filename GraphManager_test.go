@@ -4,6 +4,8 @@ import "testing"
 import "github.com/HackerSchool12/SpiderDB"
 import "github.com/HackerSchool12/SpiderDB/socialGraph"
 
+import "fmt"
+
 //TODO: update tests to use SpiderDB.Node.Equals instead of just compairing id
 var gm *spiderDB.GraphManager
 
@@ -22,21 +24,41 @@ func initTestEdges(gm spiderDB.GraphBackend) []*socialGraph.SocialEdge {
 }
 
 func initTestNodes(gm spiderDB.GraphBackend) []*socialGraph.SocialNode {
-	var testNodes = []*socialGraph.SocialNode{
-		socialGraph.NewSocialNode("Joe", "joe@joe.com", 120, gm),
-		socialGraph.NewSocialNode("Bill", "bill@billisAwsome.com", 40, gm),
-		socialGraph.NewSocialNode("Jane", "jane@think.com", 40, gm),
-		socialGraph.NewSocialNode("Sue", "Sue@isueyou.com", 3240, gm),
-		socialGraph.NewSocialNode("Sally", "smadfs@gmail.com", 30, gm),
-		socialGraph.NewSocialNode("Tom", "rawr@hackerschool.com", 5120, gm),
-		socialGraph.NewSocialNode("Domnick", "affiliate@iscamyou.com", 52, gm),
-		socialGraph.NewSocialNode("Eric", "eric@gmail.com", 52340, gm),
-		socialGraph.NewSocialNode("Sarah", "sarah@yahoo.com", 5546, gm),
-		socialGraph.NewSocialNode("Nathan", "shortemail@ineedemail.com", 43, gm),
-		socialGraph.NewSocialNode("That Guy", "anothertroll@myemailwastaken.com", 51, gm),
-		socialGraph.NewSocialNode("That Girl", "troll@girls.com", 51, gm),
-		socialGraph.NewSocialNode("Ugg", "mrr@complain.com", 5234, gm),
+	var testNodes []*socialGraph.SocialNode
+
+	const numdum = 8
+	pics := [numdum]string{"picTEST", "http://4.bp.blogspot.com/-Q2hjS1dS1R8/T4YXpOfNjOI/AAAAAAAAAxQ/c-V_1FkMYmo/s1600/Bug.jpg",
+		"https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcRs5AS0g3hHRdJsO7gBgwu9v1Hr4grtuc_G1dh59MbxEVW3VH-GNw",
+		"https://encrypted-tbn3.google.com/images?q=tbn:ANd9GcSJVzRTk5jiGvRIcKQZs-pm4__kMQOWae0WGGl3H32xZCTvci9U",
+		"https://encrypted-tbn3.google.com/images?q=tbn:ANd9GcQ6VCAy3UhBqNohPBG1Dr5nVd2WfwTLnINK_pmh0Wo7RUPh7vwpjw",
+		"https://encrypted-tbn1.google.com/images?q=tbn:ANd9GcQ677iObh3n9DhnfwvpFUH-ksX9mXv3kyS_h7npytmLACpe9EZX",
+		"https://encrypted-tbn3.google.com/images?q=tbn:ANd9GcR94C_rLFc1arqiV_Dmi6LHIQzEVWvOFJg7TxdpdR-PxtVxVLAr",
+		"https://encrypted-tbn3.google.com/images?q=tbn:ANd9GcRPaCON4nIzFMqrfCVuWAn8HoD0zH-ir-KovxFxwgy6ocUlYxHJ"}
+	bios := [numdum]string{
+		"bioTEST",
+		"I don't exist",
+		"I am from HERE",
+		"I am from THERE",
+		"I am from A",
+		"I am from B",
+		"I am from C",
+		"I am from D"}
+	names := [numdum]string{"nameTEST", "Wedunno", "Joe", "Bill", "Jane", "Sue", "Sally", "Tom"}
+	users := [numdum]string{"userTEST", "Whothatis", "jmk", "bill-o-rama", "sparkles", "user", "user", "uzaaah"}
+	github := [numdum]string{"githubTEST",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER",
+		"http://github.com/IAMAUSER"}
+
+	for k, _ := range pics {
+		newNode := socialGraph.NewSocialNode(pics[k], names[k], users[k], "emailTEST", bios[k], "skillsTEST", github[k], gm)
+		testNodes = append(testNodes, newNode)
 	}
+
 	return testNodes
 }
 func TestAddSingleNode(t *testing.T) {
@@ -289,8 +311,13 @@ func TestGetAllNodesGroup(t *testing.T) {
 }
 
 func initTestNodeByteAA() [][]byte {
-	return [][]byte{[]byte("Name"), []byte("Joe"), []byte("Email"),
-		[]byte("joe@joe.com"), []byte("Awesomeness"), []byte("120")}
+	return [][]byte{[]byte("Pic"), []byte("picTEST"),
+		[]byte("ProperName"), []byte("nameTEST"),
+		[]byte("UserName"), []byte("userTEST"),
+		[]byte("Email"), []byte("emailTEST"),
+		[]byte("Bio"), []byte("bioTEST"),
+		[]byte("Skills"), []byte("skillsTEST"),
+		[]byte("Github"), []byte("githubTEST")}
 }
 
 func TestNodeFromHash(t *testing.T) {
@@ -334,5 +361,37 @@ func TestGetNodeEdges(t *testing.T) {
 	for _, v := range edges {
 		gm.AddEdge(v)
 	}
+}
 
+func TestGetOutgoingNeighbors(t *testing.T) {
+	gm = new(spiderDB.GraphManager)
+
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	hgw := socialGraph.NewSocialNode("http://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/H_G_Wells_pre_1922.jpg/220px-H_G_Wells_pre_1922.jpg",
+		"Herbert Wells", "H.G.", "traveler@time.future", "Writer", "SciFi", "whatisgithub?", gm)
+	msg := socialGraph.NewMessageNode("Will he ever return?")
+
+	edg := socialGraph.NewSocialEdge(1898, "jittered", gm)
+
+	gm.AddNode(hgw)
+	gm.AddNode(msg)
+	gm.AddEdge(edg)
+
+	gm.Attach(hgw, msg, edg)
+
+	neighbors, err := gm.GetOutgoingNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
+
+	if len(neighbors) != 1 {
+		t.Errorf("GetOutgoingNeighbors Failed - %v neighbors", len(neighbors))
+
+		for _, v := range neighbors {
+			fmt.Printf("***************%v --%v-- %v************\n", v.NodeA, v.Edg, v.NodeB)
+		}
+	}
+
+	if err != nil {
+		t.Error(err)
+	}
 }

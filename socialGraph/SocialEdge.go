@@ -5,18 +5,18 @@ import "github.com/HackerSchool12/SpiderDB"
 
 type SocialEdge struct {
 	id      int
-	weight  int
 	typ     string
+	date    int
 	GM      spiderDB.GraphBackend
 	fstNode spiderDB.Node
 	sndNode spiderDB.Node
 }
 
-func NewSocialEdge(weight int, typ string, gm spiderDB.GraphBackend) *SocialEdge {
+func NewSocialEdge(date int, typ string, gm spiderDB.GraphBackend) *SocialEdge {
 	edge := new(SocialEdge)
 	edge.SetGM(gm)
 	edge.SetType(typ)
-	edge.SetWeight(weight)
+	edge.SetDate(date)
 	return edge
 }
 
@@ -40,12 +40,12 @@ func (s *SocialEdge) SetID(id string) {
 	s.id, _ = strconv.Atoi(id)
 }
 
-func (s *SocialEdge) GetWeight() int {
-	return s.weight
+func (s *SocialEdge) GetDate() int {
+	return s.date
 }
 
-func (s *SocialEdge) SetWeight(weight int) {
-	s.weight = weight
+func (s *SocialEdge) SetDate(date int) {
+	s.date = date
 }
 func (s *SocialEdge) GetType() string {
 	return s.typ
@@ -56,15 +56,15 @@ func (s *SocialEdge) SetType(typestr string) {
 
 func (s *SocialEdge) SetPropMap(props map[string][]byte) {
 	s.id = spiderDB.BytesToInt(props["Id"])
-	s.weight = spiderDB.BytesToInt(props["Weight"])
+	s.date = spiderDB.BytesToInt(props["Date"])
 	s.typ = string(props["Type"])
 }
 
 func (s *SocialEdge) GetPropMap() map[string][]byte {
 	var propMap = map[string][]byte{
-		"Id":     spiderDB.IntToBytes(s.id),
-		"Weight": spiderDB.IntToBytes(s.weight),
-		"Type":   []byte(s.typ)}
+		"Id":   spiderDB.IntToBytes(s.id),
+		"Date": spiderDB.IntToBytes(s.date),
+		"Type": []byte(s.typ)}
 	return propMap
 }
 

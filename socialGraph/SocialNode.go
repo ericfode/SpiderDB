@@ -1,25 +1,35 @@
 package socialGraph
 
-import "strconv"
 import "github.com/HackerSchool12/SpiderDB"
 
 //TODO: rename struct vars to lowercase
 //TODO: add commit function
 type SocialNode struct {
-	Id          string
-	Name        string
-	Email       string
-	Awesomeness int
-	Edges       map[string][]spiderDB.Edge
-	GM          spiderDB.GraphBackend
+	Id         string
+	Pic        string
+	ProperName string
+	UserName   string
+	Email      string
+	Bio        string
+	Skills     string
+	Github     string
+	Edges      map[string][]spiderDB.Edge
+	GM         spiderDB.GraphBackend
 }
 
-func NewSocialNode(name string, email string, awe int, gm spiderDB.GraphBackend) *SocialNode {
+func NewSocialNode(pic string, proper string, user string,
+	email string, bio string, skills string, github string,
+	gm spiderDB.GraphBackend) *SocialNode {
 	sn := new(SocialNode)
 	sn.GM = gm
-	sn.Awesomeness = awe
-	sn.Name = name
+	sn.Pic = pic
+	sn.ProperName = proper
+	sn.UserName = user
 	sn.Email = email
+	sn.Bio = bio
+	sn.Skills = skills
+	sn.Github = github
+	sn.Edges = make(map[string][]spiderDB.Edge)
 	return sn
 }
 
@@ -50,12 +60,28 @@ func (n *SocialNode) SetID(id string) {
 	}*/
 }
 
-func (n *SocialNode) GetName() string {
-	return n.Name
+func (n *SocialNode) GetPic() string {
+	return n.Pic
 }
 
-func (n *SocialNode) SetName(name string) {
-	n.Name = name
+func (n *SocialNode) SetPic(pic string) {
+	n.Pic = pic
+}
+
+func (n *SocialNode) GetProperName() string {
+	return n.ProperName
+}
+
+func (n *SocialNode) SetProperName(proper string) {
+	n.ProperName = proper
+}
+
+func (n *SocialNode) GetUserName() string {
+	return n.UserName
+}
+
+func (n *SocialNode) SetUserName(name string) {
+	n.UserName = name
 	/*if n.IsReged() {
 		n.GM.UpdateNodeProp(n, "Name", []byte(name))
 	}*/
@@ -72,23 +98,51 @@ func (n *SocialNode) SetEmail(email string) {
 	}*/
 }
 
-func (n *SocialNode) GetAwesomeness() int {
-	return n.Awesomeness
+func (n *SocialNode) GetBio() string {
+	return n.Bio
+}
+
+func (n *SocialNode) SetBio(bio string) {
+	n.Bio = bio
 }
 
 //User Function
 //use bytes package instead for better performace...
-func (n *SocialNode) SetAwesomeness(awe int) {
+/*func (n *SocialNode) SetAwesomeness(awe int) {
 	n.Awesomeness = awe
 	if n.IsReged() {
 		n.GM.UpdateNodeProp(n, "Name", []byte(strconv.Itoa(awe)))
 	}
 }
-
+*/
 //DB only function
+
+func (n *SocialNode) GetSkills() string {
+	return n.Skills
+}
+
+func (n *SocialNode) SetSkills(skillz string) {
+	n.Skills = skillz
+}
+
+func (n *SocialNode) GetGit() string {
+	return n.Github
+}
+
+func (n *SocialNode) SetGit(github string) {
+	n.Github = github
+}
+
 func (n *SocialNode) SetEdges(edges []spiderDB.Edge) {
 	n.Edges = make(map[string][]spiderDB.Edge)
 	n.AddEdges(edges)
+}
+
+func (n *SocialNode) AddEdge(edge spiderDB.Edge) {
+	if n.Edges == nil {
+		n.Edges = make(map[string][]spiderDB.Edge)
+	}
+	n.Edges[edge.GetType()] = append(n.Edges[edge.GetType()], edge)
 }
 
 //DB only function
@@ -98,7 +152,7 @@ func (n *SocialNode) AddEdges(edges []spiderDB.Edge) {
 	}
 }
 
-func (n *SocialNode) RemoveEdge(edges []spiderDB.Edge) {
+func (n *SocialNode) RemoveEdges(edges []spiderDB.Edge) {
 	for _, findedge := range edges {
 		for index, edge := range n.Edges[findedge.GetType()] {
 			if edge.GetID() == findedge.GetID() {
@@ -110,26 +164,38 @@ func (n *SocialNode) RemoveEdge(edges []spiderDB.Edge) {
 
 func (n *SocialNode) GetPropMap() map[string][]byte {
 	var propMap = map[string][]byte{
-		"Id":          []byte(n.Id),
-		"Name":        []byte(n.Name),
-		"Email":       []byte(n.Email),
-		"Awesomeness": []byte(strconv.Itoa(n.Awesomeness))}
+		"Id":         []byte(n.Id),
+		"Pic":        []byte(n.Pic),
+		"ProperName": []byte(n.ProperName),
+		"UserName":   []byte(n.UserName),
+		"Email":      []byte(n.Email),
+		"Bio":        []byte(n.Bio),
+		"Skills":     []byte(n.Skills),
+		"Github":     []byte(n.Github)}
 	return propMap
 }
 
 func (n *SocialNode) SetPropMap(props map[string][]byte) {
 	n.Id = string(props["Id"])
-	n.Name = string(props["Name"])
+	n.Pic = string(props["Pic"])
+	n.ProperName = string(props["ProperName"])
+	n.UserName = string(props["UserName"])
 	n.Email = string(props["Email"])
-	n.Awesomeness, _ = strconv.Atoi(string(props["Awesomeness"]))
+	n.Bio = string(props["Bio"])
+	n.Skills = string(props["Skills"])
+	n.Github = string(props["Github"])
 }
 
 func (n *SocialNode) Equals(other spiderDB.Node) bool {
 	if a, ok := other.(*SocialNode); ok {
 		if n.GetID() == a.GetID() &&
-			n.GetName() == a.GetName() &&
+			n.GetPic() == a.GetPic() &&
+			n.GetProperName() == a.GetProperName() &&
+			n.GetUserName() == a.GetUserName() &&
 			n.GetEmail() == a.GetEmail() &&
-			n.GetAwesomeness() == a.GetAwesomeness() {
+			n.GetBio() == a.GetBio() &&
+			n.GetSkills() == a.GetSkills() &&
+			n.GetGit() == a.GetGit() {
 			return true
 		}
 	}
