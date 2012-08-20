@@ -381,14 +381,14 @@ func TestGetNeighbors(t *testing.T) {
 
 	gm.Attach(hgw, msg, edg)
 
-	neighbors, err := gm.GetOutgoingNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
+	neighbors, err := gm.GetNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
 
 	if err != nil {
 		t.Error(err.Error())
 	}
 
 	if len(neighbors) != 1 {
-		t.Errorf("GetOutgoingNeighbors Failed - %v neighbors", len(neighbors))
+		t.Errorf("GetNeighbors Failed - %v neighbors", len(neighbors))
 
 		fmt.Printf("***************%v ************\n", neighbors)
 	}
@@ -398,7 +398,7 @@ func TestGetNeighbors(t *testing.T) {
 	}
 }
 
-func TestMultipleOutgoingNeighbors(t *testing.T) {
+func TestMultipleNeighbors(t *testing.T) {
 	gm = new(spiderDB.GraphManager)
 
 	gm.Initialize()
@@ -425,17 +425,13 @@ func TestMultipleOutgoingNeighbors(t *testing.T) {
 	gm.Attach(hgw, msg1, edg1)
 	gm.Attach(msg2, hgw, edg2)
 
-	neighbors, err := gm.GetOutgoingNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
+	neighbors, err := gm.GetNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
 
 	if err != nil {
 		t.Error(err.Error())
 	}
 
-	for _, con := range neighbors {
-		fmt.Printf("%v ----> %v\n", con.NodeA, con.NodeB)
-	}
-
-	if len(neighbors) != 2 {
-		t.Errorf("GetOutgoingNeighbors Failed - %v neighbors", len(neighbors))
+	if len(neighbors) != 3 {
+		t.Errorf("GetNeighbors Failed - %v neighbors", len(neighbors))
 	}
 }

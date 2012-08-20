@@ -163,8 +163,10 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
+	gm.client.Hset(node_s+node2.GetID()+inadj_s, node1.GetID(), []byte(e.GetID()))
 	if !e.IsDirected() {
 		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
+		gm.client.Hset(node_s+node1.GetID()+inadj_s, node2.GetID(), []byte(e.GetID()))
 	}
 
 	node1.AddEdge(e)
@@ -174,20 +176,34 @@ func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 
 }
 
-func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) ([]Connection, error) {
+func (gm *GraphManager) GetNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) ([]Connection, error) {
 
 	//adjArray is []byte of n,e,n,e etc
 	var err error
 
 	adjId := node_s + node.GetID() + adj_s
+	inadjId := node_s + node.GetID() + inadj_s
+
 	adjArray, err := gm.client.Hgetall(adjId)
+	inadjArray, ierr := gm.client.Hgetall(inadjId)
+
 	if err != nil {
 		return nil, err
 	}
-	adjMap := ByteAAtoStringMap(adjArray)
+	if ierr != nil {
+		return nil, ierr
+	}
+
+	neighborArr := append(adjArray, inadjArray...)
+	neighborMap := ByteAAtoStringMap(neighborArr)
+
+	for k, v := range neighborArr {
+		fmt.Printf("%v, %v\n", k, v)
+	}
+
 	neighbors := make([]Connection, 0)
 
-	for k, v := range adjMap {
+	for k, v := range neighborMap {
 		nb, err := gm.GetNode(k, constN)
 		if err != nil {
 			return nil, err
@@ -197,12 +213,8 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 			return nil, err
 		}
 
-		fmt.Printf("%v", node.Equals(ec.GetFirstNode()))
-
-		//if node.Equals(ec.GetFirstNode()) {
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
 		neighbors = append(neighbors, newConn)
-		//}
 	}
 
 	return neighbors, nil
