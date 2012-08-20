@@ -29,6 +29,7 @@ func NewSocialNode(pic string, proper string, user string,
 	sn.Bio = bio
 	sn.Skills = skills
 	sn.Github = github
+	sn.Edges = make(map[string][]spiderDB.Edge)
 	return sn
 }
 
@@ -135,6 +136,13 @@ func (n *SocialNode) SetGit(github string) {
 func (n *SocialNode) SetEdges(edges []spiderDB.Edge) {
 	n.Edges = make(map[string][]spiderDB.Edge)
 	n.AddEdges(edges)
+}
+
+func (n *SocialNode) AddEdge(edge spiderDB.Edge) {
+	if n.Edges == nil {
+		n.Edges = make(map[string][]spiderDB.Edge)
+	}
+	n.Edges[edge.GetType()] = append(n.Edges[edge.GetType()], edge)
 }
 
 //DB only function

@@ -5,6 +5,7 @@ type Node interface {
 	SetID(id string)
 
 	SetEdges(edges []Edge)
+	AddEdge(edge Edge)
 	AddEdges(edges []Edge)
 	RemoveEdges(edges []Edge)
 

@@ -9,6 +9,18 @@ type MessageNode struct {
 	GM    spiderDB.GraphBackend
 }
 
+func NewMessageNode(text string) *MessageNode {
+	mn := new(MessageNode)
+	mn.text = text
+	mn.Edges = make(map[string][]spiderDB.Edge)
+	return mn
+}
+func MessageNodeConst(id string, GM spiderDB.GraphBackend) spiderDB.Node {
+	mn := new(MessageNode)
+	mn.SetGM(GM)
+	mn.SetID(id)
+	return mn
+}
 func (n *MessageNode) GetID() string {
 	return n.id
 }
@@ -24,6 +36,9 @@ func (n *MessageNode) SetText(msg string) {
 func (n *MessageNode) SetEdges(edges []spiderDB.Edge) {
 	n.Edges = make(map[string][]spiderDB.Edge)
 	n.AddEdges(edges)
+}
+func (n *MessageNode) AddEdge(edge spiderDB.Edge) {
+	n.Edges[edge.GetType()] = append(n.Edges[edge.GetType()], edge)
 }
 func (n *MessageNode) AddEdges(edges []spiderDB.Edge) {
 	for _, edge := range edges {

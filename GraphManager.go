@@ -162,11 +162,12 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
-	if !e.IsDirected() {
-		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
-	}
-	node1.AddEdges([]Edge{e})
-	node2.AddEdges([]Edge{e})
+	//if !e.IsDirected() {
+	gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
+	//}
+
+	node1.AddEdge(e)
+	node2.AddEdge(e)
 	e.SetFirstNode(node1)
 	e.SetSecondNode(node2)
 
@@ -186,6 +187,7 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 	neighbors := make([]Connection, len(adjMap))
 
 	for k, v := range adjMap {
+
 		nb, err := gm.GetNode(k, constN)
 		if err != nil {
 			return nil, err
@@ -197,6 +199,7 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
 		neighbors = append(neighbors, newConn)
 	}
+
 	return neighbors, nil
 }
 
