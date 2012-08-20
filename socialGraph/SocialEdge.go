@@ -92,5 +92,5 @@ func (s *SocialEdge) SetSecondNode(node spiderDB.Node) {
 }
 
 func (s *SocialEdge) IsDirected() bool {
-	return false
+	return true
 }

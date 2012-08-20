@@ -8,6 +8,7 @@ package spiderDB
 
 import "github.com/alphazero/Go-Redis"
 import "strings"
+import "fmt"
 
 // consts (typo prevention)
 const currIndex_s = "currIndex"
@@ -162,9 +163,9 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
-	//if !e.IsDirected() {
-	gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
-	//}
+	if !e.IsDirected() {
+		gm.client.Hset(node_s+node2.GetID()+adj_s, node1.GetID(), []byte(e.GetID()))
+	}
 
 	node1.AddEdge(e)
 	node2.AddEdge(e)
@@ -184,10 +185,9 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 		return nil, err
 	}
 	adjMap := ByteAAtoStringMap(adjArray)
-	neighbors := make([]Connection)
+	neighbors := make([]Connection, 0)
 
 	for k, v := range adjMap {
-
 		nb, err := gm.GetNode(k, constN)
 		if err != nil {
 			return nil, err
@@ -196,8 +196,13 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 		if err != nil {
 			return nil, err
 		}
+
+		fmt.Printf("%v", node.Equals(ec.GetFirstNode()))
+
+		//if node.Equals(ec.GetFirstNode()) {
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
 		neighbors = append(neighbors, newConn)
+		//}
 	}
 
 	return neighbors, nil

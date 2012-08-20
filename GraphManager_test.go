@@ -363,7 +363,7 @@ func TestGetNodeEdges(t *testing.T) {
 	}
 }
 
-func TestGetOutgoingNeighbors(t *testing.T) {
+func TestGetNeighbors(t *testing.T) {
 	gm = new(spiderDB.GraphManager)
 
 	gm.Initialize()
@@ -383,15 +383,59 @@ func TestGetOutgoingNeighbors(t *testing.T) {
 
 	neighbors, err := gm.GetOutgoingNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
 
+	if err != nil {
+		t.Error(err.Error())
+	}
+
 	if len(neighbors) != 1 {
 		t.Errorf("GetOutgoingNeighbors Failed - %v neighbors", len(neighbors))
 
-		for _, v := range neighbors {
-			fmt.Printf("***************%v --%v-- %v************\n", v.NodeA, v.Edg, v.NodeB)
-		}
+		fmt.Printf("***************%v ************\n", neighbors)
 	}
 
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func TestMultipleOutgoingNeighbors(t *testing.T) {
+	gm = new(spiderDB.GraphManager)
+
+	gm.Initialize()
+	defer gm.ClearAll()
+
+	hgw := socialGraph.NewSocialNode("http://upload.wikimedia.org/wikipedia/commons/thumb/7/7f/H_G_Wells_pre_1922.jpg/220px-H_G_Wells_pre_1922.jpg",
+		"Herbert Wells", "H.G.", "traveler@time.future", "Writer", "SciFi", "whatisgithub?", gm)
+	msg := socialGraph.NewMessageNode("Will he ever return?")
+	msg1 := socialGraph.NewMessageNode("look, it's another message!")
+	msg2 := socialGraph.NewMessageNode("yet another message!")
+	edg := socialGraph.NewSocialEdge(1898, "jittered", gm)
+	edg1 := socialGraph.NewSocialEdge(1899, "jittered", gm)
+	edg2 := socialGraph.NewSocialEdge(1900, "jittered", gm)
+
+	gm.AddNode(hgw)
+	gm.AddNode(msg)
+	gm.AddNode(msg1)
+	gm.AddNode(msg2)
+	gm.AddEdge(edg)
+	gm.AddEdge(edg1)
+	gm.AddEdge(edg2)
+
+	gm.Attach(hgw, msg, edg)
+	gm.Attach(hgw, msg1, edg1)
+	gm.Attach(msg2, hgw, edg2)
+
+	neighbors, err := gm.GetOutgoingNeighbors(hgw, socialGraph.SocialEdgeConst, socialGraph.SocialNodeConst)
+
+	if err != nil {
+		t.Error(err.Error())
+	}
+
+	for _, con := range neighbors {
+		fmt.Printf("%v ----> %v\n", con.NodeA, con.NodeB)
+	}
+
+	if len(neighbors) != 2 {
+		t.Errorf("GetOutgoingNeighbors Failed - %v neighbors", len(neighbors))
 	}
 }
