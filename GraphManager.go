@@ -172,17 +172,28 @@ func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 
 }
 
-func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) []Connection {
+func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) ([]Connection, error) {
 
 	//adjArray is []byte of n,e,n,e etc
+	var err error
+
 	adjId := node_s + node.GetID() + adj_s
-	adjArray, _ := gm.client.Hgetall(adjId)
+	adjArray, err := gm.client.Hgetall(adjId)
+	if err != nil {
+		return nil, err
+	}
 	adjMap := ByteAAtoStringMap(adjArray)
 	neighbors := make([]Connection, len(adjMap))
 
 	for k, v := range adjMap {
-		nb, _ := gm.GetNode(k, constN)
-		ec, _ := gm.GetEdge(string(v), constE)
+		nb, err := gm.GetNode(k, constN)
+		if err != nil {
+			return nil, err
+		}
+		ec, err := gm.GetEdge(string(v), constE)
+		if err != nil {
+			return nil, err
+		}
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
 		neighbors = append(neighbors, newConn)
 	}
