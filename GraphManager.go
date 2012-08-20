@@ -184,7 +184,7 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 		return nil, err
 	}
 	adjMap := ByteAAtoStringMap(adjArray)
-	neighbors := make([]Connection, len(adjMap))
+	neighbors := make([]Connection)
 
 	for k, v := range adjMap {
 
