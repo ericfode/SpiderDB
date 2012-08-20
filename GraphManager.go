@@ -197,7 +197,7 @@ func (gm *GraphManager) GetOutgoingNeighbors(node Node, constE EdgeConstructor, 
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
 		neighbors = append(neighbors, newConn)
 	}
-	return neighbors
+	return neighbors, nil
 }
 
 //EDGE MANAGEMENT
