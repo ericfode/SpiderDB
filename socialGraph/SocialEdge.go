@@ -51,7 +51,7 @@ func (s *SocialEdge) GetType() string {
 	return s.typ
 }
 func (s *SocialEdge) SetType(typestr string) {
-
+	s.typ = typestr
 }
 
 func (s *SocialEdge) SetPropMap(props map[string][]byte) {
@@ -93,4 +93,15 @@ func (s *SocialEdge) SetSecondNode(node spiderDB.Node) {
 
 func (s *SocialEdge) IsDirected() bool {
 	return true
+}
+
+func (s *SocialEdge) Equals(o spiderDB.Edge) bool {
+	if a, ok := o.(*SocialEdge); ok {
+		if (s.GetID() == a.GetID() &&
+			s.GetDate() == a.GetDate() &&
+			s.GetType() == a.GetType()){
+			return true
+		}
+	}
+	return false
 }

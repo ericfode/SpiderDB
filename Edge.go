@@ -16,6 +16,7 @@ type Edge interface {
 
 	SetFirstNode(node Node)
 	SetSecondNode(node Node)
+	Equals(o Edge) bool
 }
 
 type EdgeConstructor func(id string, gm GraphBackend) Edge

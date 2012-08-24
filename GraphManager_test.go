@@ -209,6 +209,9 @@ func TestGetEdge(t *testing.T) {
 	if edge == nil {
 		t.Error("GM did not retrieve edge (nil)")
 	}
+	if !edge.Equals(edges[0]) {
+		t.Errorf("Edges are not equal")
+	}
 }
 
 func TestAddSingleEdge(t *testing.T) {
@@ -221,8 +224,8 @@ func TestAddSingleEdge(t *testing.T) {
 
 	gm.AddEdge(edge)
 
-	if edge.GetID() != "0" {
-		t.Errorf("GraphManager: id 0 was %d", edge.GetID())
+	if !edge.Equals(e[0]) {
+		t.Errorf("Edges are not equal")
 	}
 }
 
@@ -347,22 +350,6 @@ func TestNodeFromHash(t *testing.T) {
 	}
 }
 
-func TestGetNodeEdges(t *testing.T) {
-	gm = new(spiderDB.GraphManager)
-	gm.Initialize()
-	defer gm.ClearAll()
-
-	nodes := initTestNodes(gm)
-	edges := initTestEdges(gm)
-
-	for _, v := range nodes {
-		gm.AddNode(v)
-	}
-	for _, v := range edges {
-		gm.AddEdge(v)
-	}
-}
-
 func TestGetNeighbors(t *testing.T) {
 	gm = new(spiderDB.GraphManager)
 
@@ -388,9 +375,8 @@ func TestGetNeighbors(t *testing.T) {
 	}
 
 	if len(neighbors) != 1 {
-		t.Errorf("GetNeighbors Failed - %v neighbors", len(neighbors))
-
 		fmt.Printf("***************%v ************\n", neighbors)
+		t.Errorf("GetNeighbors Failed - %v neighbors", len(neighbors))
 	}
 
 	if err != nil {
