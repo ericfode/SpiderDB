@@ -8,7 +8,6 @@ package spiderDB
 
 import "github.com/alphazero/Go-Redis"
 import "strings"
-import "fmt"
 
 // consts (typo prevention)
 const currIndex_s = "currIndex"
@@ -194,16 +193,9 @@ func (gm *GraphManager) GetNeighbors(node Node, constE EdgeConstructor, constN N
 		return nil, ierr
 	}
 
-	neighborArr := append(adjArray, inadjArray...)
-	neighborMap := ByteAAtoStringMap(neighborArr)
-
-	for k, v := range neighborArr {
-		fmt.Printf("%v, %v\n", k, v)
-	}
-
 	neighbors := make([]Connection, 0)
 
-	for k, v := range neighborMap {
+	for k, v := range ByteAAtoStringMap(adjArray) {
 		nb, err := gm.GetNode(k, constN)
 		if err != nil {
 			return nil, err
@@ -214,6 +206,19 @@ func (gm *GraphManager) GetNeighbors(node Node, constE EdgeConstructor, constN N
 		}
 
 		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
+		neighbors = append(neighbors, newConn)
+	}
+	for k, v := range ByteAAtoStringMap(inadjArray) {
+		nb, err := gm.GetNode(k, constN)
+		if err != nil {
+			return nil, err
+		}
+		ec, err := gm.GetEdge(string(v), constE)
+		if err != nil {
+			return nil, err
+		}
+
+		newConn := Connection{NodeA: nb, NodeB: node, Edg: ec}
 		neighbors = append(neighbors, newConn)
 	}
 
