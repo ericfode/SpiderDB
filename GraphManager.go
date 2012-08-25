@@ -96,6 +96,30 @@ func (gm *GraphManager) FindNode(nindex string, construct NodeConstructor) (Node
 	return gm.GetNode(nindex, construct)
 }
 
+func (gm *GraphManager) FindNodeWithValue(hashName string, value string, construct NodeConstructor) ([]Node, error) {
+	nodeIDs, _ := gm.client.Smembers(nodes_s)
+	nodes := make([]Node, 0)
+	var err error
+	for _, v := range nodeIDs {
+		var newNode Node
+		idx := strings.LastIndex(string(v), ":")
+
+		val, _ := gm.client.Hget(string(v), hashName)
+		valstr := string(val)
+		print(string(v) + " :")
+		println(valstr)
+		if value == valstr {
+			newNode, err = gm.GetNode(string(v)[idx+1:], construct)
+			nodes = append(nodes, newNode)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+	}
+	return nodes, nil
+}
+
 //bulk update - pushes everything to database
 func (gm *GraphManager) UpdateNode(n Node) error {
 
@@ -160,7 +184,7 @@ func (gm *GraphManager) GetNode(index string, construct NodeConstructor) (Node, 
 
 //func (gm *GraphManager) GetAdjPairs(node *Node) *[]AdjPair {}
 
-func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
+func (gm *GraphManager) Attach(node2 Node, node1 Node, e Edge) {
 	gm.client.Hset(node_s+node1.GetID()+adj_s, node2.GetID(), []byte(e.GetID()))
 	gm.client.Hset(node_s+node2.GetID()+inadj_s, node1.GetID(), []byte(e.GetID()))
 	if !e.IsDirected() {
@@ -177,51 +201,43 @@ func (gm *GraphManager) Attach(node1 Node, node2 Node, e Edge) {
 
 func (gm *GraphManager) GetNeighbors(node Node, constE EdgeConstructor, constN NodeConstructor) ([]Connection, error) {
 
-	//adjArray is []byte of n,e,n,e etc
-	var err error
-
 	adjId := node_s + node.GetID() + adj_s
 	inadjId := node_s + node.GetID() + inadj_s
 
-	adjArray, err := gm.client.Hgetall(adjId)
-	inadjArray, ierr := gm.client.Hgetall(inadjId)
-
-	if err != nil {
-		return nil, err
-	}
-	if ierr != nil {
-		return nil, ierr
-	}
+	adjArray, _ := gm.client.Hgetall(adjId)
+	inadjArray, _ := gm.client.Hgetall(inadjId)
 
 	neighbors := make([]Connection, 0)
+	if adjArray != nil {
+		for k, v := range ByteAAtoStringMap(adjArray) {
+			nb, err := gm.GetNode(k, constN)
+			if err != nil {
+				return nil, err
+			}
+			ec, err := gm.GetEdge(string(v), constE)
+			if err != nil {
+				return nil, err
+			}
 
-	for k, v := range ByteAAtoStringMap(adjArray) {
-		nb, err := gm.GetNode(k, constN)
-		if err != nil {
-			return nil, err
+			newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
+			neighbors = append(neighbors, newConn)
 		}
-		ec, err := gm.GetEdge(string(v), constE)
-		if err != nil {
-			return nil, err
-		}
-
-		newConn := Connection{NodeA: node, NodeB: nb, Edg: ec}
-		neighbors = append(neighbors, newConn)
 	}
-	for k, v := range ByteAAtoStringMap(inadjArray) {
-		nb, err := gm.GetNode(k, constN)
-		if err != nil {
-			return nil, err
-		}
-		ec, err := gm.GetEdge(string(v), constE)
-		if err != nil {
-			return nil, err
-		}
+	if inadjArray != nil {
+		for k, v := range ByteAAtoStringMap(inadjArray) {
+			nb, err := gm.GetNode(k, constN)
+			if err != nil {
+				return nil, err
+			}
+			ec, err := gm.GetEdge(string(v), constE)
+			if err != nil {
+				return nil, err
+			}
 
-		newConn := Connection{NodeA: nb, NodeB: node, Edg: ec}
-		neighbors = append(neighbors, newConn)
+			newConn := Connection{NodeA: nb, NodeB: node, Edg: ec}
+			neighbors = append(neighbors, newConn)
+		}
 	}
-
 	return neighbors, nil
 }
 
