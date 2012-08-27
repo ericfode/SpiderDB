@@ -1,6 +1,6 @@
 package socialGraph
 
-import "github.com/Ericfode/SpiderDB"
+import "github.com/ericfode/SpiderDB"
 
 //TODO: rename struct vars to lowercase
 //TODO: add commit function
