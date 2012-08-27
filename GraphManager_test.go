@@ -1,8 +1,8 @@
 package spiderDB_test
 
 import "testing"
-import "github.com/Ericfode/SpiderDB"
-import "github.com/Ericfode/SpiderDB/socialGraph"
+import "github.com/ericfode/SpiderDB"
+import "github.com/ericfode/SpiderDB/socialGraph"
 
 import "fmt"
 
