@@ -1,6 +1,6 @@
 package socialGraph
 
-import "github.com/HackerSchool12/SpiderDB"
+import "github.com/Ericfode/SpiderDB"
 
 type MessageNode struct {
 	id    string
