@@ -1,7 +1,7 @@
 package socialGraph
 
 import "strconv"
-import "github.com/Ericfode/SpiderDB"
+import "github.com/ericfode/SpiderDB"
 
 type SocialEdge struct {
 	id      int
