@@ -3,8 +3,6 @@ SpiderDB
 
 Graph database backed by Redis.
 
-github.com/hackerschool/SpiderDB is the real one now.
-
 SpiderDB uses Redis as a backing datastore.
 
 1. Define Node API
