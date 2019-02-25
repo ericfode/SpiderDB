@@ -3,9 +3,9 @@ SpiderDB
 
 Graph database backed by Redis.
 
-SpiderDB uses Redis as a backing datastore.
+github.com/hackerschool/SpiderDB is the real one now.
 
-TODO: Create Response to hash function for getting nodes
+SpiderDB uses Redis as a backing datastore.
 
 1. Define Node API
 
@@ -22,7 +22,3 @@ TODO: Create function for converting byte arrays to ints more quickly
 	+ BFS
 	+ Tests
 
-
-
-SpidySource (the first use)
-Will be used as a version control system that knows your code
